@@ -22,18 +22,20 @@ BEGIN
         customer_id,
         message,
         sent_at,
-        type
+        type,
+        is_read
     )
     VALUES (
         gen_random_uuid(),
         NOW(),
         NOW(),
         NEW.customer_id,
-        'Dear ' || customer_name || ', Your ' || NEW.month || '/' || NEW.year
+        'Dear ' || customer_name || E'\nYour ' || NEW.month || '/' || NEW.year
             || ' utility bill of ' || NEW.total_amount
-            || ' FRW has been successfully processed.',
+            || ' frw has been successfully processed',
         NOW(),
-        'BILL_GENERATED'
+        'BILL_GENERATED',
+        FALSE
     );
 
     RETURN NEW;
@@ -47,60 +49,7 @@ AFTER INSERT ON bills
 FOR EACH ROW
 EXECUTE FUNCTION fn_after_bill_insert();;
 
--- trg_after_payment_insert:
--- Marks a fully settled bill as PAID and creates a PAYMENT_CONFIRMED notification.
-CREATE OR REPLACE FUNCTION fn_after_payment_insert()
-RETURNS TRIGGER
-LANGUAGE plpgsql
-AS $$
-DECLARE
-    bill_balance NUMERIC(19, 2);
-    bill_customer_id UUID;
-    customer_name VARCHAR;
-BEGIN
-    SELECT b.outstanding_balance, b.customer_id, c.full_name
-    INTO bill_balance, bill_customer_id, customer_name
-    FROM bills b
-    JOIN customers c ON c.id = b.customer_id
-    WHERE b.id = NEW.bill_id;
-
-    IF bill_balance <= 0 THEN
-        UPDATE bills
-        SET status = 'PAID',
-            updated_at = NOW()
-        WHERE id = NEW.bill_id;
-
-        INSERT INTO notifications (
-            id,
-            created_at,
-            updated_at,
-            customer_id,
-            message,
-            sent_at,
-            type
-        )
-        VALUES (
-            gen_random_uuid(),
-            NOW(),
-            NOW(),
-            bill_customer_id,
-            'Dear ' || customer_name
-                || ', Your payment has been received. Your bill is now fully paid.',
-            NOW(),
-            'PAYMENT_CONFIRMED'
-        );
-    END IF;
-
-    RETURN NEW;
-END;
-$$;;
-
-DROP TRIGGER IF EXISTS trg_after_payment_insert ON payments;;
-
-CREATE TRIGGER trg_after_payment_insert
-AFTER INSERT ON payments
-FOR EACH ROW
-EXECUTE FUNCTION fn_after_payment_insert();;
+-- Payment balance updates and PAYMENT_CONFIRMED notifications are handled in PaymentServiceImpl.
 
 -- generate_monthly_bills:
 -- Generates bills for all eligible readings in a month/year and logs row-level failures.

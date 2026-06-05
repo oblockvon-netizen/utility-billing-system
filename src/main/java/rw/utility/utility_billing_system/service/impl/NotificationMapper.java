@@ -6,13 +6,11 @@ import rw.utility.utility_billing_system.entity.Notification;
 /**
  * Maps Notification entities to NotificationResponse DTOs.
  */
-
 final class NotificationMapper {
 
     private NotificationMapper() {
     }
 
-    // Maps enum type to a client-friendly label
     static NotificationResponse toResponse(Notification notification) {
         return new NotificationResponse(
                 notification.getId(),
@@ -20,6 +18,7 @@ final class NotificationMapper {
                 notification.getCustomer().getFullName(),
                 notification.getMessage(),
                 notification.getType(),
+                notification.isRead(),
                 notification.getSentAt(),
                 notification.getCreatedAt()
         );

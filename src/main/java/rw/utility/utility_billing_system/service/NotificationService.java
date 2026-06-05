@@ -3,14 +3,20 @@ package rw.utility.utility_billing_system.service;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import rw.utility.utility_billing_system.dto.NotificationResponse;
+import rw.utility.utility_billing_system.dto.UnreadCountResponse;
 
 import java.util.UUID;
 
 /**
- * Business contract for retrieving user-scoped billing notifications.
+ * Business contract for system-wide and customer-scoped notification access.
  */
-
 public interface NotificationService {
 
-    // Customers may only query their own notifications
-    Page<NotificationResponse> getByUserId(UUID userId, Pageable pageable);}
+    Page<NotificationResponse> findAllSystemWide(Pageable pageable);
+
+    Page<NotificationResponse> findMyNotifications(Pageable pageable);
+
+    UnreadCountResponse getMyUnreadCount();
+
+    NotificationResponse markAsRead(UUID notificationId);
+}

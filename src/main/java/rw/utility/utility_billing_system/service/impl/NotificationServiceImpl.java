@@ -3,13 +3,13 @@ package rw.utility.utility_billing_system.service.impl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import rw.utility.utility_billing_system.dto.NotificationResponse;
+import rw.utility.utility_billing_system.dto.UnreadCountResponse;
 import rw.utility.utility_billing_system.entity.Customer;
+import rw.utility.utility_billing_system.entity.Notification;
 import rw.utility.utility_billing_system.entity.User;
 import rw.utility.utility_billing_system.exception.BusinessRuleException;
 import rw.utility.utility_billing_system.exception.ResourceNotFoundException;
@@ -23,7 +23,7 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 /**
- * Retrieves paginated notifications for a given user.
+ * Retrieves and updates notifications for admins and linked customer accounts.
  */
 public class NotificationServiceImpl implements NotificationService {
 
@@ -33,43 +33,59 @@ public class NotificationServiceImpl implements NotificationService {
 
     @Override
     @Transactional(readOnly = true)
-    public Page<NotificationResponse> getByUserId(UUID userId, Pageable pageable) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+    public Page<NotificationResponse> findAllSystemWide(Pageable pageable) {
+        return notificationRepository.findAllByOrderBySentAtDesc(pageable)
+                .map(NotificationMapper::toResponse);
+    }
 
-        assertCanAccessUserNotifications(user);
-
-        Customer customer = customerRepository.findByEmailIgnoreCase(user.getEmail())
-                .orElse(null);
-
+    @Override
+    @Transactional(readOnly = true)
+    public Page<NotificationResponse> findMyNotifications(Pageable pageable) {
+        Customer customer = getLinkedCustomerForCurrentUser();
         if (customer == null) {
-            // Users without a linked customer record have no notifications
-            return Page.empty(pageable);        }
-
+            return Page.empty(pageable);
+        }
         return notificationRepository
                 .findByCustomerIdOrderBySentAtDesc(customer.getId(), pageable)
                 .map(NotificationMapper::toResponse);
     }
 
-    private void assertCanAccessUserNotifications(User user) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication == null || !authentication.isAuthenticated()) {
-            throw new BusinessRuleException("Authentication is required");
+    @Override
+    @Transactional(readOnly = true)
+    public UnreadCountResponse getMyUnreadCount() {
+        Customer customer = getLinkedCustomerForCurrentUser();
+        if (customer == null) {
+            return new UnreadCountResponse(0);
+        }
+        return new UnreadCountResponse(
+                notificationRepository.countByCustomerIdAndReadFalse(customer.getId())
+        );
+    }
+
+    @Override
+    @Transactional
+    public NotificationResponse markAsRead(UUID notificationId) {
+        Customer customer = getLinkedCustomerForCurrentUser();
+        if (customer == null) {
+            throw new BusinessRuleException("No customer account is linked to your user profile");
         }
 
-        boolean isAdmin = authentication.getAuthorities().stream()
-                .map(GrantedAuthority::getAuthority)
-                .anyMatch("ROLE_ADMIN"::equals);
+        Notification notification = notificationRepository
+                .findByIdAndCustomerId(notificationId, customer.getId())
+                .orElseThrow(() -> new ResourceNotFoundException("Notification not found"));
 
-        if (isAdmin) {
-            return;
-        }
+        notification.setRead(true);
+        return NotificationMapper.toResponse(notificationRepository.save(notification));
+    }
 
-        User authenticatedUser = userRepository.findByEmail(authentication.getName())
+    private Customer getLinkedCustomerForCurrentUser() {
+        User user = getCurrentUser();
+        return customerRepository.findByEmailIgnoreCase(user.getEmail()).orElse(null);
+    }
+
+    private User getCurrentUser() {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        return userRepository.findByEmail(email)
                 .orElseThrow(() -> new BusinessRuleException("Authenticated user not found"));
-
-        if (!authenticatedUser.getId().equals(user.getId())) {
-            throw new BusinessRuleException("You can only view your own notifications");
-        }
     }
 }

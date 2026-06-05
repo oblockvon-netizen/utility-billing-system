@@ -163,7 +163,7 @@ Create each test account by changing the name, email, and phone number.
 {
   "fullName": "WASAC Admin",
   "email": "admin@wasac.rw",
-  "phoneNumber": "250788100001",
+  "phoneNumber": "0788100001",
   "password": "Password123!",
   "role": "ROLE_CUSTOMER"
 }
@@ -253,14 +253,19 @@ Expected: `200 OK` with the updated role list.
 
 Use `ADMIN_TOKEN` or `OPERATOR_TOKEN`.
 
+Validation rules:
+
+- `nationalId` must be exactly **18 characters**
+- `phoneNumber` must be **10 digits** starting with `078` or `079`
+
 ### POST `/api/customers`
 
 ```json
 {
   "fullName": "Jean Uwimana",
-  "nationalId": "1199980012345678",
+  "nationalId": "119998001234567801",
   "email": "jean.uwimana@example.com",
-  "phoneNumber": "250788222333",
+  "phoneNumber": "0788222333",
   "address": "Kigali, Gasabo"
 }
 ```
@@ -284,9 +289,9 @@ The request must include all customer fields.
 ```json
 {
   "fullName": "Jean Claude Uwimana",
-  "nationalId": "1199980012345678",
+  "nationalId": "119998001234567801",
   "email": "jean.uwimana@example.com",
-  "phoneNumber": "250788222334",
+  "phoneNumber": "0788222334",
   "address": "Kigali, Kicukiro"
 }
 ```
@@ -562,15 +567,24 @@ WHERE type = 'BILL_GENERATED'
 ORDER BY sent_at DESC;
 ```
 
-Expected: a message containing the customer name, bill month/year, and total.
+Expected message format:
+
+```text
+Dear <CustomerName>
+Your <Month/Year> utility bill of <Amount> frw has been successfully processed
+```
 
 ## 8. Payments
 
 Use `FINANCE_TOKEN` or `CUSTOMER_TOKEN`.
 
+Payments are only accepted **after** a bill has been generated **and approved**.
+Partial payments and full payments are both supported; the bill becomes `PAID` when the
+outstanding balance reaches zero.
+
 ### POST `/api/payments`
 
-Record a partial payment:
+Approve the bill first, then record a partial payment:
 
 ```json
 {
@@ -599,6 +613,8 @@ Expected: `201 Created`, outstanding balance `0.00`, and bill status `PAID`.
 
 Negative tests:
 
+- Pay a `PENDING` bill before approval: expect `422 Unprocessable Entity`.
+- Pay more than the outstanding balance: expect `422 Unprocessable Entity`.
 - Record another payment on the paid bill: expect `422 Unprocessable Entity`.
 - Submit amount `0` or a negative amount: expect `400 Bad Request`.
 - Use `ADMIN_TOKEN`: expect `403 Forbidden`.

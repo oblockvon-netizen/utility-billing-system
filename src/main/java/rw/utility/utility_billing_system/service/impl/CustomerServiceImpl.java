@@ -9,8 +9,10 @@ import rw.utility.utility_billing_system.dto.CustomerRequest;
 import rw.utility.utility_billing_system.dto.CustomerResponse;
 import rw.utility.utility_billing_system.entity.Customer;
 import rw.utility.utility_billing_system.enums.Status;
+import rw.utility.utility_billing_system.exception.BusinessRuleException;
 import rw.utility.utility_billing_system.exception.DuplicateResourceException;
 import rw.utility.utility_billing_system.exception.ResourceNotFoundException;
+import rw.utility.utility_billing_system.util.ValidationPatterns;
 import rw.utility.utility_billing_system.repository.CustomerRepository;
 import rw.utility.utility_billing_system.service.CustomerService;
 
@@ -28,14 +30,15 @@ public class CustomerServiceImpl implements CustomerService {
     @Override
     @Transactional
     public CustomerResponse create(CustomerRequest request) {
-        String nationalId = normalize(request.nationalId());
+        String nationalId = normalizeNationalId(request.nationalId());
+        String phoneNumber = normalizePhoneNumber(request.phoneNumber());
         ensureNationalIdAvailable(nationalId);
 
         Customer customer = Customer.builder()
                 .fullName(request.fullName().trim())
                 .nationalId(nationalId)
                 .email(request.email().trim().toLowerCase())
-                .phoneNumber(request.phoneNumber().trim())
+                .phoneNumber(phoneNumber)
                 .address(request.address().trim())
                 .status(Status.ACTIVE)
                 .build();
@@ -46,7 +49,8 @@ public class CustomerServiceImpl implements CustomerService {
     @Transactional
     public CustomerResponse update(UUID customerId, CustomerRequest request) {
         Customer customer = getCustomer(customerId);
-        String nationalId = normalize(request.nationalId());
+        String nationalId = normalizeNationalId(request.nationalId());
+        String phoneNumber = normalizePhoneNumber(request.phoneNumber());
         if (!customer.getNationalId().equals(nationalId)) {
             ensureNationalIdAvailable(nationalId);
         }
@@ -54,7 +58,7 @@ public class CustomerServiceImpl implements CustomerService {
         customer.setFullName(request.fullName().trim());
         customer.setNationalId(nationalId);
         customer.setEmail(request.email().trim().toLowerCase());
-        customer.setPhoneNumber(request.phoneNumber().trim());
+        customer.setPhoneNumber(phoneNumber);
         customer.setAddress(request.address().trim());
         return CustomerMapper.toResponse(customerRepository.save(customer));
     }
@@ -90,7 +94,19 @@ public class CustomerServiceImpl implements CustomerService {
         }
     }
 
-    private String normalize(String value) {
-        // National IDs are stored in a canonical uppercase form
-        return value.trim().toUpperCase();    }
+    private String normalizeNationalId(String value) {
+        String nationalId = value.trim().toUpperCase();
+        if (nationalId.length() != 18) {
+            throw new BusinessRuleException(ValidationPatterns.NATIONAL_ID_MESSAGE);
+        }
+        return nationalId;
+    }
+
+    private String normalizePhoneNumber(String value) {
+        String phoneNumber = value.trim();
+        if (!phoneNumber.matches(ValidationPatterns.PHONE_NUMBER)) {
+            throw new BusinessRuleException(ValidationPatterns.PHONE_NUMBER_MESSAGE);
+        }
+        return phoneNumber;
+    }
 }

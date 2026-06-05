@@ -25,7 +25,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 /**
- * JPA entity for in-app notifications delivered to users (e.g. bill issued, payment received).
+ * JPA entity for in-app notifications delivered to customers (e.g. bill issued, payment received).
  */
 public class Notification extends BaseEntity {
 
@@ -33,7 +33,6 @@ public class Notification extends BaseEntity {
     @JoinColumn(name = "customer_id", nullable = false)
     private Customer customer;
 
-    // Message body may contain formatted billing details
     @Column(nullable = false, columnDefinition = "TEXT")
     private String message;
 
@@ -43,4 +42,8 @@ public class Notification extends BaseEntity {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private NotificationType type;
+
+    @Column(name = "is_read", nullable = false)
+    @Builder.Default
+    private boolean read = false;
 }
