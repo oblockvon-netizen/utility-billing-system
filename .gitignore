@@ -31,3 +31,5 @@ build/
 
 ### VS Code ###
 .vscode/
+PROMPT.md
+AGENT.md
