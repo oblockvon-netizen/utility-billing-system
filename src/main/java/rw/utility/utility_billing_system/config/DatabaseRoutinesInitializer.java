@@ -1,0 +1,26 @@
+package rw.utility.utility_billing_system.config;
+
+import lombok.RequiredArgsConstructor;
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.core.annotation.Order;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.jdbc.datasource.init.ResourceDatabasePopulator;
+import org.springframework.stereotype.Component;
+
+import javax.sql.DataSource;
+
+@Component
+@Order(2)
+@RequiredArgsConstructor
+public class DatabaseRoutinesInitializer implements CommandLineRunner {
+
+    private final DataSource dataSource;
+
+    @Override
+    public void run(String... args) {
+        ResourceDatabasePopulator populator = new ResourceDatabasePopulator();
+        populator.setSeparator(";;");
+        populator.addScript(new ClassPathResource("db/routines.sql"));
+        populator.execute(dataSource);
+    }
+}

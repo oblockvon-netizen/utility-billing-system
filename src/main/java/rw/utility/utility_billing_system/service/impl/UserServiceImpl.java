@@ -6,9 +6,11 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import rw.utility.utility_billing_system.dto.UserResponse;
+import rw.utility.utility_billing_system.entity.Role;
 import rw.utility.utility_billing_system.entity.User;
 import rw.utility.utility_billing_system.enums.Status;
 import rw.utility.utility_billing_system.exception.ResourceNotFoundException;
+import rw.utility.utility_billing_system.repository.RoleRepository;
 import rw.utility.utility_billing_system.repository.UserRepository;
 import rw.utility.utility_billing_system.service.UserService;
 
@@ -19,6 +21,7 @@ import java.util.UUID;
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
+    private final RoleRepository roleRepository;
 
     @Override
     @Transactional(readOnly = true)
@@ -32,6 +35,17 @@ public class UserServiceImpl implements UserService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
         user.setStatus(status);
+        return UserMapper.toResponse(userRepository.save(user));
+    }
+
+    @Override
+    @Transactional
+    public UserResponse assignRole(UUID userId, rw.utility.utility_billing_system.enums.Role role) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+        Role roleEntity = roleRepository.findByName(role)
+                .orElseThrow(() -> new ResourceNotFoundException("Role not found"));
+        user.getRoles().add(roleEntity);
         return UserMapper.toResponse(userRepository.save(user));
     }
 }

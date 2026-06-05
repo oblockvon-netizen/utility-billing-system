@@ -1,18 +1,20 @@
 package rw.utility.utility_billing_system.exception;
 
+import com.fasterxml.jackson.databind.exc.InvalidFormatException;
+import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.mapping.PropertyReferenceException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import rw.utility.utility_billing_system.debug.AgentDebugLog;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import rw.utility.utility_billing_system.dto.ApiResponse;
 
 import java.util.List;
-import java.util.Map;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -53,21 +55,48 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(PropertyReferenceException.class)
     public ResponseEntity<ApiResponse<Void>> handleInvalidSort(PropertyReferenceException exception) {
-        // #region agent log
-        AgentDebugLog.log(
-                "GlobalExceptionHandler:handleInvalidSort",
-                "H1",
-                "invalid pageable sort property",
-                Map.of(
-                        "property", exception.getPropertyName(),
-                        "type", exception.getType().getType().getSimpleName()
-                ),
-                null
-        );
-        // #endregion
         String message = "Invalid sort field '%s' for %s. Use query params like sort=email,asc"
                 .formatted(exception.getPropertyName(), exception.getType().getType().getSimpleName());
         return error(HttpStatus.BAD_REQUEST, message);
+    }
+
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<ApiResponse<Void>> handleMalformedJson(
+            HttpMessageNotReadableException exception
+    ) {
+        if (exception.getCause() instanceof InvalidFormatException invalidFormat) {
+            String field = invalidFormat.getPath().isEmpty()
+                    ? "request body"
+                    : invalidFormat.getPath().get(0).getFieldName();
+            String message = "Invalid value for '%s'. Expected %s"
+                    .formatted(field, invalidFormat.getTargetType().getSimpleName());
+            return error(HttpStatus.BAD_REQUEST, message);
+        }
+        return error(HttpStatus.BAD_REQUEST, "Invalid request body format");
+    }
+
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<ApiResponse<Void>> handleTypeMismatch(
+            MethodArgumentTypeMismatchException exception
+    ) {
+        String expectedType = exception.getRequiredType() != null
+                ? exception.getRequiredType().getSimpleName()
+                : "valid type";
+        String message = "Invalid value for '%s'. Expected %s"
+                .formatted(exception.getName(), expectedType);
+        return error(HttpStatus.BAD_REQUEST, message);
+    }
+
+    @ExceptionHandler(DataAccessException.class)
+    public ResponseEntity<ApiResponse<Void>> handleDataAccess(DataAccessException exception) {
+        String causeMessage = exception.getMostSpecificCause().getMessage();
+        if (causeMessage != null && causeMessage.contains("generate_monthly_bills")) {
+            return error(
+                    HttpStatus.SERVICE_UNAVAILABLE,
+                    "Database routine generate_monthly_bills is missing. Ensure routines.sql ran on startup."
+            );
+        }
+        return error(HttpStatus.INTERNAL_SERVER_ERROR, "A database error occurred");
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)

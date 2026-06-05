@@ -1,2 +1,4 @@
 springdoc:
   default-flat-param-object: true
+  swagger-ui:
+    validator-url: none

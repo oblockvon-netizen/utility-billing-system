@@ -15,13 +15,12 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import rw.utility.utility_billing_system.debug.AgentDebugLog;
 import rw.utility.utility_billing_system.dto.ApiResponse;
+import rw.utility.utility_billing_system.dto.AssignRoleRequest;
 import rw.utility.utility_billing_system.dto.UpdateUserStatusRequest;
 import rw.utility.utility_billing_system.dto.UserResponse;
 import rw.utility.utility_billing_system.service.UserService;
 
-import java.util.Map;
 import java.util.UUID;
 
 @RestController
@@ -36,31 +35,8 @@ public class UserController {
 
     @GetMapping
     public ResponseEntity<ApiResponse<Page<UserResponse>>> getAllUsers(@ParameterObject Pageable pageable) {
-        // #region agent log
-        AgentDebugLog.log(
-                "UserController:getAllUsers",
-                "H1",
-                "pageable received",
-                Map.of(
-                        "page", pageable.getPageNumber(),
-                        "size", pageable.getPageSize(),
-                        "sort", pageable.getSort().toString()
-                ),
-                null
-        );
-        // #endregion
-        Page<UserResponse> users = userService.getAllUsers(pageable);
-        // #region agent log
-        AgentDebugLog.log(
-                "UserController:getAllUsers",
-                "H3",
-                "users loaded",
-                Map.of("totalElements", users.getTotalElements()),
-                null
-        );
-        // #endregion
         return ResponseEntity.ok(
-                ApiResponse.success("Users retrieved successfully", users)
+                ApiResponse.success("Users retrieved successfully", userService.getAllUsers(pageable))
         );
     }
 
@@ -73,6 +49,19 @@ public class UserController {
                 ApiResponse.success(
                         "User status updated successfully",
                         userService.updateStatus(userId, request.status())
+                )
+        );
+    }
+
+    @PutMapping("/{userId}/roles")
+    public ResponseEntity<ApiResponse<UserResponse>> assignRole(
+            @PathVariable UUID userId,
+            @Valid @RequestBody AssignRoleRequest request
+    ) {
+        return ResponseEntity.ok(
+                ApiResponse.success(
+                        "Role assigned successfully",
+                        userService.assignRole(userId, request.role())
                 )
         );
     }

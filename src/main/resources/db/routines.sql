@@ -1,4 +1,5 @@
-CREATE EXTENSION IF NOT EXISTS pgcrypto;
+-- Spring JDBC splits on ;; so PL/pgSQL bodies can use single semicolons.
+CREATE EXTENSION IF NOT EXISTS pgcrypto;;
 
 -- trg_after_bill_insert:
 -- Creates a BILL_GENERATED notification after a new bill is inserted.
@@ -37,14 +38,14 @@ BEGIN
 
     RETURN NEW;
 END;
-$$;
+$$;;
 
-DROP TRIGGER IF EXISTS trg_after_bill_insert ON bills;
+DROP TRIGGER IF EXISTS trg_after_bill_insert ON bills;;
 
 CREATE TRIGGER trg_after_bill_insert
 AFTER INSERT ON bills
 FOR EACH ROW
-EXECUTE FUNCTION fn_after_bill_insert();
+EXECUTE FUNCTION fn_after_bill_insert();;
 
 -- trg_after_payment_insert:
 -- Marks a fully settled bill as PAID and creates a PAYMENT_CONFIRMED notification.
@@ -92,14 +93,14 @@ BEGIN
 
     RETURN NEW;
 END;
-$$;
+$$;;
 
-DROP TRIGGER IF EXISTS trg_after_payment_insert ON payments;
+DROP TRIGGER IF EXISTS trg_after_payment_insert ON payments;;
 
 CREATE TRIGGER trg_after_payment_insert
 AFTER INSERT ON payments
 FOR EACH ROW
-EXECUTE FUNCTION fn_after_payment_insert();
+EXECUTE FUNCTION fn_after_payment_insert();;
 
 -- generate_monthly_bills:
 -- Generates bills for all eligible readings in a month/year and logs row-level failures.
@@ -219,4 +220,4 @@ BEGIN
 
     CLOSE reading_cursor;
 END;
-$$;
+$$;;

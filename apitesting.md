@@ -27,7 +27,9 @@ Successful responses use:
 1. Start PostgreSQL and create the configured `wasac_billing` database.
 2. Set a JWT secret containing at least 32 bytes.
 3. Start the Spring Boot application.
-4. Execute `src/main/resources/db/routines.sql` against PostgreSQL.
+4. On startup the app runs `src/main/resources/db/routines.sql` automatically.
+   If monthly bill generation fails, manually execute that script against
+   `wasac_billing` and verify with `\df generate_monthly_bills`.
 5. Open Swagger UI and use **Authorize** to enter JWT tokens.
 
 ### Required Test Roles
@@ -44,7 +46,18 @@ Use these test accounts:
 | Finance | `finance@wasac.rw` | `ROLE_FINANCE` |
 | Customer | `customer@wasac.rw` | `ROLE_CUSTOMER` |
 
-After signup, assign roles:
+After signup, assign roles in PostgreSQL. Connect to the **application database**
+first — the `postgres=#` prompt means you are on the default `postgres`
+database, where these tables do not exist.
+
+```sql
+\c wasac_billing
+\dt
+```
+
+You should see `users`, `roles`, and `user_roles`. If those tables are missing,
+start the Spring Boot app once so Hibernate creates the schema, then run the
+role inserts below.
 
 ```sql
 INSERT INTO user_roles (user_id, role_id)
@@ -71,6 +84,36 @@ ON CONFLICT DO NOTHING;
 
 Log in again after changing roles so the account can be tested with the
 correct authorities.
+
+**Or assign roles through the API** (admin only) after signup:
+
+### PUT `/api/users/{userId}/roles`
+
+Replace `{userId}` with the finance user's `id` from `GET /api/users`.
+
+```json
+{
+  "role": "ROLE_FINANCE"
+}
+```
+
+Expected: `200 OK` and `data.roles` includes `ROLE_FINANCE`. Repeat for
+`ROLE_ADMIN` and `ROLE_OPERATOR` on the other test accounts.
+
+**Role assignment troubleshooting:**
+
+- Use the exact signup email `finance@wasac.rw` (not `finance@wassac.rw`).
+- Connect to `wasac_billing`, not the default `postgres` database.
+- After SQL or API role changes, **log in again** to get a new JWT.
+- Verify with:
+
+```sql
+SELECT u.email, r.name
+FROM users u
+JOIN user_roles ur ON ur.user_id = u.id
+JOIN roles r ON r.id = ur.role_id
+WHERE u.email = 'finance@wasac.rw';
+```
 
 ### Save IDs and Tokens
 
@@ -188,6 +231,19 @@ Restore the user:
   "status": "ACTIVE"
 }
 ```
+
+### PUT `/api/users/{userId}/roles`
+
+Assign `ROLE_FINANCE` to the finance test account (see also **Required Test
+Roles** above):
+
+```json
+{
+  "role": "ROLE_FINANCE"
+}
+```
+
+Expected: `200 OK` with the updated role list.
 
 ## 3. Customers
 
@@ -383,6 +439,9 @@ Negative test: set `maxUnits` lower than `minUnits`; expect
 Use `OPERATOR_TOKEN`.
 
 ### POST `/api/readings`
+
+Use the meter **UUID** from `POST /api/meters` (`data.id`), not the meter
+number (`meterNumber` such as `WTR-000001` or `MI001`).
 
 ```json
 {
