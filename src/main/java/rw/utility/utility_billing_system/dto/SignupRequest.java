@@ -3,7 +3,6 @@ package rw.utility.utility_billing_system.dto;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import rw.utility.utility_billing_system.enums.Role;
 
@@ -22,10 +21,10 @@ public record SignupRequest(
         @Size(min = 8, message = "Password must contain at least 8 characters")
         String password,
 
-        @NotNull(message = "Role is required")
         @Schema(
-                description = "Public signup only permits ROLE_CUSTOMER",
-                example = "ROLE_CUSTOMER"
+                description = "Optional. Defaults to ROLE_CUSTOMER. Public signup only permits ROLE_CUSTOMER.",
+                example = "ROLE_CUSTOMER",
+                defaultValue = "ROLE_CUSTOMER"
         )
         Role role
 ) {

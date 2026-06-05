@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import rw.utility.utility_billing_system.dto.ApiResponse;
-import rw.utility.utility_billing_system.dto.AssignRoleRequest;
+import rw.utility.utility_billing_system.dto.SetUserRolesRequest;
 import rw.utility.utility_billing_system.dto.UpdateUserStatusRequest;
 import rw.utility.utility_billing_system.dto.UserResponse;
 import rw.utility.utility_billing_system.service.UserService;
@@ -54,14 +54,14 @@ public class UserController {
     }
 
     @PutMapping("/{userId}/roles")
-    public ResponseEntity<ApiResponse<UserResponse>> assignRole(
+    public ResponseEntity<ApiResponse<UserResponse>> setRoles(
             @PathVariable UUID userId,
-            @Valid @RequestBody AssignRoleRequest request
+            @Valid @RequestBody SetUserRolesRequest request
     ) {
         return ResponseEntity.ok(
                 ApiResponse.success(
-                        "Role assigned successfully",
-                        userService.assignRole(userId, request.role())
+                        "User roles updated successfully",
+                        userService.setRoles(userId, request.roles())
                 )
         );
     }

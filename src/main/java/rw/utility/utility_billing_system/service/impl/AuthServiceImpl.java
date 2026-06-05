@@ -44,11 +44,15 @@ public class AuthServiceImpl implements AuthService {
             throw new DuplicateResourceException("A user with this email already exists");
         }
 
-        if (request.role() != rw.utility.utility_billing_system.enums.Role.ROLE_CUSTOMER) {
+        rw.utility.utility_billing_system.enums.Role signupRole = request.role() != null
+                ? request.role()
+                : rw.utility.utility_billing_system.enums.Role.ROLE_CUSTOMER;
+        if (signupRole != rw.utility.utility_billing_system.enums.Role.ROLE_CUSTOMER) {
             throw new BusinessRuleException("Public signup only permits ROLE_CUSTOMER");
         }
 
-        Role customerRole = roleRepository.findByName(request.role())
+        Role customerRole = roleRepository
+                .findByName(rw.utility.utility_billing_system.enums.Role.ROLE_CUSTOMER)
                 .orElseThrow(() -> new ResourceNotFoundException("ROLE_CUSTOMER is not configured"));
 
         User user = User.builder()

@@ -56,6 +56,8 @@ public class SecurityConfig {
                                 .hasAnyAuthority("ROLE_ADMIN", "ROLE_FINANCE", "ROLE_CUSTOMER")
                         .requestMatchers("/api/payments/**")
                                 .hasAnyAuthority("ROLE_FINANCE", "ROLE_CUSTOMER")
+                        .requestMatchers("/api/notifications/**")
+                                .hasAnyAuthority("ROLE_ADMIN", "ROLE_CUSTOMER")
                         .anyRequest().authenticated())
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();

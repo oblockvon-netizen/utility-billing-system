@@ -14,7 +14,10 @@ import rw.utility.utility_billing_system.repository.RoleRepository;
 import rw.utility.utility_billing_system.repository.UserRepository;
 import rw.utility.utility_billing_system.service.UserService;
 
+import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -40,12 +43,16 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public UserResponse assignRole(UUID userId, rw.utility.utility_billing_system.enums.Role role) {
+    public UserResponse setRoles(UUID userId, Set<rw.utility.utility_billing_system.enums.Role> roles) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
-        Role roleEntity = roleRepository.findByName(role)
-                .orElseThrow(() -> new ResourceNotFoundException("Role not found"));
-        user.getRoles().add(roleEntity);
+
+        Set<Role> roleEntities = roles.stream()
+                .map(role -> roleRepository.findByName(role)
+                        .orElseThrow(() -> new ResourceNotFoundException("Role not found: " + role)))
+                .collect(Collectors.toCollection(HashSet::new));
+
+        user.setRoles(roleEntities);
         return UserMapper.toResponse(userRepository.save(user));
     }
 }

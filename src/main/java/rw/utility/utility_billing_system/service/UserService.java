@@ -3,9 +3,9 @@ package rw.utility.utility_billing_system.service;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import rw.utility.utility_billing_system.dto.UserResponse;
-import rw.utility.utility_billing_system.enums.Role;
 import rw.utility.utility_billing_system.enums.Status;
 
+import java.util.Set;
 import java.util.UUID;
 
 public interface UserService {
@@ -14,5 +14,5 @@ public interface UserService {
 
     UserResponse updateStatus(UUID userId, Status status);
 
-    UserResponse assignRole(UUID userId, Role role);
+    UserResponse setRoles(UUID userId, Set<rw.utility.utility_billing_system.enums.Role> roles);
 }
