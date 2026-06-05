@@ -1,15 +1,18 @@
 package rw.utility.utility_billing_system.exception;
 
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.mapping.PropertyReferenceException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import rw.utility.utility_billing_system.debug.AgentDebugLog;
 import rw.utility.utility_billing_system.dto.ApiResponse;
 
 import java.util.List;
+import java.util.Map;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -46,6 +49,25 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(AuthenticationException.class)
     public ResponseEntity<ApiResponse<Void>> handleAuthentication(AuthenticationException exception) {
         return error(HttpStatus.UNAUTHORIZED, "Invalid email, password, or account status");
+    }
+
+    @ExceptionHandler(PropertyReferenceException.class)
+    public ResponseEntity<ApiResponse<Void>> handleInvalidSort(PropertyReferenceException exception) {
+        // #region agent log
+        AgentDebugLog.log(
+                "GlobalExceptionHandler:handleInvalidSort",
+                "H1",
+                "invalid pageable sort property",
+                Map.of(
+                        "property", exception.getPropertyName(),
+                        "type", exception.getType().getType().getSimpleName()
+                ),
+                null
+        );
+        // #endregion
+        String message = "Invalid sort field '%s' for %s. Use query params like sort=email,asc"
+                .formatted(exception.getPropertyName(), exception.getType().getType().getSimpleName());
+        return error(HttpStatus.BAD_REQUEST, message);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)

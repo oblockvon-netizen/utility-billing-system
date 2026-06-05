@@ -117,12 +117,16 @@ Create each test account by changing the name, email, and phone number.
   "fullName": "WASAC Admin",
   "email": "admin@wasac.rw",
   "phoneNumber": "250788100001",
-  "password": "Password123!"
+  "password": "Password123!",
+  "role": "ROLE_CUSTOMER"
 }
 ```
 
 Expected: `201 Created`, JWT token returned, user status `ACTIVE`, and initial
 role `ROLE_CUSTOMER`.
+
+Public signup only accepts `ROLE_CUSTOMER`. Submitting `ROLE_ADMIN`,
+`ROLE_OPERATOR`, or `ROLE_FINANCE` returns `422 Unprocessable Entity`.
 
 Repeat for:
 

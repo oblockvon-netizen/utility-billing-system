@@ -16,7 +16,7 @@ The actual many-to-many join table defined by the JPA entities is `user_roles`.
 - Primary key: `id`
 - Unique constraint: `email`
 - Fields: `full_name`, `email`, `phone_number`, `password`, `status`,
-  `created_at`, `updated_at`
+`created_at`, `updated_at`
 - Passwords are stored as BCrypt hashes.
 
 ### `roles`
@@ -25,7 +25,7 @@ The actual many-to-many join table defined by the JPA entities is `user_roles`.
 - Unique constraint: `name`
 - Fields: `name`, `created_at`, `updated_at`
 - Allowed role names: `ROLE_ADMIN`, `ROLE_OPERATOR`, `ROLE_FINANCE`,
-  `ROLE_CUSTOMER`
+`ROLE_CUSTOMER`
 
 ### `user_roles`
 
@@ -38,7 +38,7 @@ The actual many-to-many join table defined by the JPA entities is `user_roles`.
 - Primary key: `id`
 - Unique constraint: `national_id`
 - Fields: `full_name`, `national_id`, `email`, `phone_number`, `address`,
-  `status`, `created_at`, `updated_at`
+`status`, `created_at`, `updated_at`
 
 ### `meters`
 
@@ -46,7 +46,7 @@ The actual many-to-many join table defined by the JPA entities is `user_roles`.
 - Foreign key: `customer_id` references `customers.id`
 - Unique constraint: `meter_number`
 - Fields: `meter_number`, `meter_type`, `installation_date`, `status`,
-  `customer_id`, `created_at`, `updated_at`
+`customer_id`, `created_at`, `updated_at`
 
 ### `meter_readings`
 
@@ -54,16 +54,16 @@ The actual many-to-many join table defined by the JPA entities is `user_roles`.
 - Foreign key: `meter_id` references `meters.id`
 - Unique constraint: (`meter_id`, `month`, `year`)
 - Fields: `meter_id`, `previous_reading`, `current_reading`, `consumption`,
-  `reading_date`, `month`, `year`, `created_at`, `updated_at`
+`reading_date`, `month`, `year`, `created_at`, `updated_at`
 
 ### `tariffs`
 
 - Primary key: `id`
 - Fields: `meter_type`, `tariff_type`, `unit_price`, `min_units`, `max_units`,
-  `service_charge`, `vat_rate`, `penalty_rate`, `effective_date`, `active`,
-  `created_at`, `updated_at`
+`service_charge`, `vat_rate`, `penalty_rate`, `effective_date`, `active`,
+`created_at`, `updated_at`
 - Tariffs are selected by meter type and effective date rather than linked to
-  bills by a foreign key.
+bills by a foreign key.
 
 ### `bills`
 
@@ -71,11 +71,11 @@ The actual many-to-many join table defined by the JPA entities is `user_roles`.
 - Foreign key: `customer_id` references `customers.id`
 - Foreign key: `meter_id` references `meters.id`
 - Foreign key and unique constraint: `meter_reading_id` references
-  `meter_readings.id`
+`meter_readings.id`
 - Fields: `month`, `year`, `total_consumption`, `unit_charge`,
-  `service_charge`, `vat_amount`, `penalty_amount`, `total_amount`,
-  `amount_paid`, `outstanding_balance`, `status`, `generated_date`,
-  `due_date`, `approved_by`, `created_at`, `updated_at`
+`service_charge`, `vat_amount`, `penalty_amount`, `total_amount`,
+`amount_paid`, `outstanding_balance`, `status`, `generated_date`,
+`due_date`, `approved_by`, `created_at`, `updated_at`
 
 ### `payments`
 
@@ -83,20 +83,20 @@ The actual many-to-many join table defined by the JPA entities is `user_roles`.
 - Foreign key: `bill_id` references `bills.id`
 - Unique constraint: `reference`
 - Fields: `bill_id`, `amount_paid`, `payment_method`, `payment_date`,
-  `reference`, `created_at`, `updated_at`
+`reference`, `created_at`, `updated_at`
 
 ### `notifications`
 
 - Primary key: `id`
 - Foreign key: `customer_id` references `customers.id`
 - Fields: `customer_id`, `message`, `sent_at`, `type`, `created_at`,
-  `updated_at`
+`updated_at`
 - Bill and payment database triggers create notification rows.
 
 ## Relationships
 
 - A user can have many roles, and a role can belong to many users through
-  `user_roles`.
+`user_roles`.
 - A customer can own many meters.
 - A meter can have many meter readings.
 - Each meter reading can generate at most one bill.
@@ -105,26 +105,26 @@ The actual many-to-many join table defined by the JPA entities is `user_roles`.
 - A bill can receive many payments.
 - A customer can receive many notifications.
 - Tariffs apply to meters by matching `meter_type`; there is no tariff foreign
-  key on bills because bills store charge snapshots.
+key on bills because bills store charge snapshots.
 
 ## Database Business Rules
 
 - Customer national IDs, meter numbers, user emails, role names, and payment
-  references must be unique.
+references must be unique.
 - Only one reading is allowed per meter, month, and year.
 - Each reading can generate at most one bill.
 - Only active customers and active meters are included in monthly bill
-  generation.
+generation.
 - Billing selects the latest active tariff whose `effective_date` is not later
-  than the generation date.
+than the generation date.
 - Existing bills retain their calculated charge values when tariffs change.
 - The bill-insert trigger creates a `BILL_GENERATED` notification.
 - The payment-insert trigger marks fully settled bills as `PAID` and creates a
-  `PAYMENT_CONFIRMED` notification.
+`PAYMENT_CONFIRMED` notification.
 - The monthly billing procedure catches and logs errors per reading so one
-  invalid row does not stop the remaining batch.
+invalid row does not stop the remaining batch.
 
-## Mermaid ERD
+## ERD
 
 ```mermaid
 erDiagram
@@ -257,3 +257,6 @@ erDiagram
     bills ||--o{ payments : receives
     customers ||--o{ notifications : receives
 ```
+
+
+

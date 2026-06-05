@@ -13,6 +13,7 @@ import rw.utility.utility_billing_system.dto.SignupRequest;
 import rw.utility.utility_billing_system.entity.Role;
 import rw.utility.utility_billing_system.entity.User;
 import rw.utility.utility_billing_system.enums.Status;
+import rw.utility.utility_billing_system.exception.BusinessRuleException;
 import rw.utility.utility_billing_system.exception.DuplicateResourceException;
 import rw.utility.utility_billing_system.exception.ResourceNotFoundException;
 import rw.utility.utility_billing_system.repository.RoleRepository;
@@ -43,7 +44,11 @@ public class AuthServiceImpl implements AuthService {
             throw new DuplicateResourceException("A user with this email already exists");
         }
 
-        Role customerRole = roleRepository.findByName(rw.utility.utility_billing_system.enums.Role.ROLE_CUSTOMER)
+        if (request.role() != rw.utility.utility_billing_system.enums.Role.ROLE_CUSTOMER) {
+            throw new BusinessRuleException("Public signup only permits ROLE_CUSTOMER");
+        }
+
+        Role customerRole = roleRepository.findByName(request.role())
                 .orElseThrow(() -> new ResourceNotFoundException("ROLE_CUSTOMER is not configured"));
 
         User user = User.builder()

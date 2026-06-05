@@ -1,8 +1,11 @@
 package rw.utility.utility_billing_system.dto;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
+import rw.utility.utility_billing_system.enums.Role;
 
 public record SignupRequest(
         @NotBlank(message = "Full name is required")
@@ -17,6 +20,13 @@ public record SignupRequest(
 
         @NotBlank(message = "Password is required")
         @Size(min = 8, message = "Password must contain at least 8 characters")
-        String password
+        String password,
+
+        @NotNull(message = "Role is required")
+        @Schema(
+                description = "Public signup only permits ROLE_CUSTOMER",
+                example = "ROLE_CUSTOMER"
+        )
+        Role role
 ) {
 }

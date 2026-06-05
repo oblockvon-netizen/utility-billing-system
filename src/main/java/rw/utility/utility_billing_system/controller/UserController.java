@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
@@ -14,11 +15,13 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import rw.utility.utility_billing_system.debug.AgentDebugLog;
 import rw.utility.utility_billing_system.dto.ApiResponse;
 import rw.utility.utility_billing_system.dto.UpdateUserStatusRequest;
 import rw.utility.utility_billing_system.dto.UserResponse;
 import rw.utility.utility_billing_system.service.UserService;
 
+import java.util.Map;
 import java.util.UUID;
 
 @RestController
@@ -32,9 +35,32 @@ public class UserController {
     private final UserService userService;
 
     @GetMapping
-    public ResponseEntity<ApiResponse<Page<UserResponse>>> getAllUsers(Pageable pageable) {
+    public ResponseEntity<ApiResponse<Page<UserResponse>>> getAllUsers(@ParameterObject Pageable pageable) {
+        // #region agent log
+        AgentDebugLog.log(
+                "UserController:getAllUsers",
+                "H1",
+                "pageable received",
+                Map.of(
+                        "page", pageable.getPageNumber(),
+                        "size", pageable.getPageSize(),
+                        "sort", pageable.getSort().toString()
+                ),
+                null
+        );
+        // #endregion
+        Page<UserResponse> users = userService.getAllUsers(pageable);
+        // #region agent log
+        AgentDebugLog.log(
+                "UserController:getAllUsers",
+                "H3",
+                "users loaded",
+                Map.of("totalElements", users.getTotalElements()),
+                null
+        );
+        // #endregion
         return ResponseEntity.ok(
-                ApiResponse.success("Users retrieved successfully", userService.getAllUsers(pageable))
+                ApiResponse.success("Users retrieved successfully", users)
         );
     }
 
