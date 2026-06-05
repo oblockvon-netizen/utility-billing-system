@@ -24,7 +24,7 @@ import rw.utility.utility_billing_system.service.PenaltyService;
 import java.util.UUID;
 
 @RestController
-@RequestMapping({"/api/penalties", "/api/penalities"})
+@RequestMapping("/api/penalties")
 @RequiredArgsConstructor
 @SecurityRequirement(name = "bearerAuth")
 @PreAuthorize("hasAuthority('ROLE_ADMIN')")
