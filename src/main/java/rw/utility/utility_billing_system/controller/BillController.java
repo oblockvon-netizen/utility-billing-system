@@ -30,6 +30,9 @@ import java.util.UUID;
 @SecurityRequirement(name = "bearerAuth")
 @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_FINANCE', 'ROLE_CUSTOMER')")
 @Tag(name = "Bills", description = "Utility bill generation, approval, and retrieval")
+/**
+ * REST resource for bill generation, monthly batch runs, approval, and lookup. Accessible to ADMIN, FINANCE, and CUSTOMER roles.
+ */
 public class BillController {
 
     private final BillService billService;
@@ -45,6 +48,7 @@ public class BillController {
                 ));
     }
 
+    // Batch generation delegates to the generate_monthly_bills database routine
     @PostMapping("/generate")
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public ResponseEntity<ApiResponse<Void>> generateMonthlyBills(

@@ -7,9 +7,13 @@ import rw.utility.utility_billing_system.entity.MeterReading;
 
 import java.util.UUID;
 
+/**
+ * Spring Data repository for MeterReading with duplicate month/year detection.
+ */
+
 public interface MeterReadingRepository extends JpaRepository<MeterReading, UUID> {
 
+    // Enforces one reading per meter per billing period
     boolean existsByMeterIdAndMonthAndYear(UUID meterId, int month, int year);
-
     Page<MeterReading> findByMeterId(UUID meterId, Pageable pageable);
 }

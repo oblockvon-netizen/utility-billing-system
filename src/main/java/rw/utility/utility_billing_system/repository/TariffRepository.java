@@ -10,8 +10,13 @@ import java.time.LocalDate;
 import java.util.Optional;
 import java.util.UUID;
 
+/**
+ * Spring Data repository for Tariff queries including active-rate resolution.
+ */
+
 public interface TariffRepository extends JpaRepository<Tariff, UUID> {
 
+    // Returns the applicable rate as of a given bill date
     Optional<Tariff> findTopByMeterTypeAndActiveTrueAndEffectiveDateLessThanEqualOrderByEffectiveDateDesc(
             MeterType type,
             LocalDate date

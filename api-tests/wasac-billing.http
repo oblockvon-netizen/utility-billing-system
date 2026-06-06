@@ -1,0 +1,646 @@
+# WASAC Utility Billing System — REST Client test suite
+# Run top-to-bottom. Requires Spring Boot on http://localhost:8080
+# After Phase 1 signup, run SQL role bootstrap (see README.md) before Phase 2 login.
+
+@baseUrl = http://localhost:8080
+@password = Password123!
+
+###############################################################################
+# PHASE 1 — SIGNUP (public)
+###############################################################################
+
+### 1.1 Signup Admin
+# @name signupAdmin
+POST {{baseUrl}}/api/auth/signup
+Content-Type: application/json
+
+{
+  "fullName": "WASAC Admin",
+  "email": "admin@wasac.rw",
+  "phoneNumber": "250788100001",
+  "password": "{{password}}",
+  "role": "ROLE_CUSTOMER"
+}
+
+@adminUserId = {{signupAdmin.response.body.$.data.user.id}}
+
+### 1.2 Signup Operator
+# @name signupOperator
+POST {{baseUrl}}/api/auth/signup
+Content-Type: application/json
+
+{
+  "fullName": "WASAC Operator",
+  "email": "operator@wasac.rw",
+  "phoneNumber": "250788100002",
+  "password": "{{password}}",
+  "role": "ROLE_CUSTOMER"
+}
+
+@operatorUserId = {{signupOperator.response.body.$.data.user.id}}
+
+### 1.3 Signup Finance
+# @name signupFinance
+POST {{baseUrl}}/api/auth/signup
+Content-Type: application/json
+
+{
+  "fullName": "WASAC Finance",
+  "email": "finance@wasac.rw",
+  "phoneNumber": "250788100003",
+  "password": "{{password}}",
+  "role": "ROLE_CUSTOMER"
+}
+
+@financeUserId = {{signupFinance.response.body.$.data.user.id}}
+
+### 1.4 Signup Customer portal user
+# @name signupCustomer
+POST {{baseUrl}}/api/auth/signup
+Content-Type: application/json
+
+{
+  "fullName": "WASAC Customer",
+  "email": "customer@wasac.rw",
+  "phoneNumber": "250788100004",
+  "password": "{{password}}",
+  "role": "ROLE_CUSTOMER"
+}
+
+@customerUserId = {{signupCustomer.response.body.$.data.user.id}}
+
+### 1.5 NEGATIVE — Duplicate email signup (expect 409)
+POST {{baseUrl}}/api/auth/signup
+Content-Type: application/json
+
+{
+  "fullName": "Duplicate Admin",
+  "email": "admin@wasac.rw",
+  "phoneNumber": "250788199999",
+  "password": "{{password}}",
+  "role": "ROLE_CUSTOMER"
+}
+
+### 1.6 NEGATIVE — Invalid role on signup (expect 422)
+POST {{baseUrl}}/api/auth/signup
+Content-Type: application/json
+
+{
+  "fullName": "Bad Role User",
+  "email": "badrole@wasac.rw",
+  "phoneNumber": "250788188888",
+  "password": "{{password}}",
+  "role": "ROLE_ADMIN"
+}
+
+###############################################################################
+# PHASE 2 — LOGIN (run after SQL role bootstrap in README.md)
+###############################################################################
+
+### 2.1 Login Admin
+# @name loginAdmin
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "admin@wasac.rw",
+  "password": "{{password}}"
+}
+
+@adminToken = {{loginAdmin.response.body.$.data.token}}
+
+### 2.2 Login Operator
+# @name loginOperator
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "operator@wasac.rw",
+  "password": "{{password}}"
+}
+
+@operatorToken = {{loginOperator.response.body.$.data.token}}
+
+### 2.3 Login Finance
+# @name loginFinance
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "finance@wasac.rw",
+  "password": "{{password}}"
+}
+
+@financeToken = {{loginFinance.response.body.$.data.token}}
+
+### 2.4 Login Customer
+# @name loginCustomer
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "customer@wasac.rw",
+  "password": "{{password}}"
+}
+
+@customerToken = {{loginCustomer.response.body.$.data.token}}
+
+### 2.5 NEGATIVE — Wrong password (expect 401)
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "admin@wasac.rw",
+  "password": "WrongPassword!"
+}
+
+###############################################################################
+# PHASE 3 — ADMIN: Users & Tariffs
+###############################################################################
+
+### 3.1 List all users (admin)
+GET {{baseUrl}}/api/users?page=0&size=10
+Content-Type: application/json
+Authorization: Bearer {{adminToken}}
+
+### 3.2 Assign OPERATOR role to operator user (admin)
+PUT {{baseUrl}}/api/users/{{operatorUserId}}/roles
+Content-Type: application/json
+Authorization: Bearer {{adminToken}}
+
+{
+  "roles": ["ROLE_OPERATOR"]
+}
+
+### 3.3 Assign FINANCE role to finance user (admin)
+PUT {{baseUrl}}/api/users/{{financeUserId}}/roles
+Content-Type: application/json
+Authorization: Bearer {{adminToken}}
+
+{
+  "roles": ["ROLE_FINANCE"]
+}
+
+### 3.4 Re-login Operator (refresh JWT with ROLE_OPERATOR)
+# @name reloginOperator
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "operator@wasac.rw",
+  "password": "{{password}}"
+}
+
+@operatorToken = {{reloginOperator.response.body.$.data.token}}
+
+### 3.5 Re-login Finance (refresh JWT with ROLE_FINANCE)
+# @name reloginFinance
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "finance@wasac.rw",
+  "password": "{{password}}"
+}
+
+@financeToken = {{reloginFinance.response.body.$.data.token}}
+
+### 3.6 Create water tariff (admin)
+# @name createTariff
+POST {{baseUrl}}/api/tariffs
+Content-Type: application/json
+Authorization: Bearer {{adminToken}}
+
+{
+  "meterType": "WATER",
+  "tariffType": "FLAT",
+  "unitPrice": 500.00,
+  "minUnits": 0,
+  "maxUnits": null,
+  "serviceCharge": 1000.00,
+  "vatRate": 18,
+  "penaltyRate": 5,
+  "effectiveDate": "2026-01-01",
+  "active": true
+}
+
+@tariffId = {{createTariff.response.body.$.data.id}}
+
+### 3.7 Get tariff by ID (admin)
+GET {{baseUrl}}/api/tariffs/{{tariffId}}
+Content-Type: application/json
+Authorization: Bearer {{adminToken}}
+
+### 3.8 List tariffs (admin)
+GET {{baseUrl}}/api/tariffs?page=0&size=10
+Content-Type: application/json
+Authorization: Bearer {{adminToken}}
+
+### 3.9 NEGATIVE — Customer cannot access tariffs (expect 403)
+GET {{baseUrl}}/api/tariffs?page=0&size=10
+Content-Type: application/json
+Authorization: Bearer {{customerToken}}
+
+### 3.10 NEGATIVE — Customer cannot list users (expect 403)
+GET {{baseUrl}}/api/users?page=0&size=10
+Content-Type: application/json
+Authorization: Bearer {{customerToken}}
+
+### 3.11 NEGATIVE — No token (expect 401)
+GET {{baseUrl}}/api/users?page=0&size=10
+Content-Type: application/json
+
+###############################################################################
+# PHASE 4 — OPERATOR: Customers & Meters
+###############################################################################
+
+### 4.1 Create customer (operator)
+# @name createCustomer
+POST {{baseUrl}}/api/customers
+Content-Type: application/json
+Authorization: Bearer {{operatorToken}}
+
+{
+  "fullName": "Jean Uwimana",
+  "nationalId": "1199980012345678",
+  "email": "jean.uwimana@example.com",
+  "phoneNumber": "250788222333",
+  "address": "Kigali, Gasabo"
+}
+
+@customerId = {{createCustomer.response.body.$.data.id}}
+
+### 4.2 NEGATIVE — Duplicate national ID (expect 409)
+POST {{baseUrl}}/api/customers
+Content-Type: application/json
+Authorization: Bearer {{operatorToken}}
+
+{
+  "fullName": "Duplicate Person",
+  "nationalId": "1199980012345678",
+  "email": "duplicate@example.com",
+  "phoneNumber": "250788222444",
+  "address": "Kigali"
+}
+
+### 4.3 Get customer by ID (operator)
+GET {{baseUrl}}/api/customers/{{customerId}}
+Content-Type: application/json
+Authorization: Bearer {{operatorToken}}
+
+### 4.4 List customers (operator)
+GET {{baseUrl}}/api/customers?page=0&size=10
+Content-Type: application/json
+Authorization: Bearer {{operatorToken}}
+
+### 4.5 Deactivate customer (for meter negative test)
+PUT {{baseUrl}}/api/customers/{{customerId}}/status
+Content-Type: application/json
+Authorization: Bearer {{operatorToken}}
+
+{
+  "status": "INACTIVE"
+}
+
+### 4.6 NEGATIVE — Meter on inactive customer (expect 422)
+POST {{baseUrl}}/api/meters
+Content-Type: application/json
+Authorization: Bearer {{operatorToken}}
+
+{
+  "meterNumber": "WTR-FAIL-001",
+  "meterType": "WATER",
+  "installationDate": "2026-01-15",
+  "customerId": "{{customerId}}"
+}
+
+### 4.7 Reactivate customer
+PUT {{baseUrl}}/api/customers/{{customerId}}/status
+Content-Type: application/json
+Authorization: Bearer {{operatorToken}}
+
+{
+  "status": "ACTIVE"
+}
+
+### 4.8 Create water meter (operator)
+# @name createMeter
+POST {{baseUrl}}/api/meters
+Content-Type: application/json
+Authorization: Bearer {{operatorToken}}
+
+{
+  "meterNumber": "WTR-000001",
+  "meterType": "WATER",
+  "installationDate": "2026-01-15",
+  "customerId": "{{customerId}}"
+}
+
+@meterId = {{createMeter.response.body.$.data.id}}
+
+### 4.9 NEGATIVE — Duplicate meter number (expect 409)
+POST {{baseUrl}}/api/meters
+Content-Type: application/json
+Authorization: Bearer {{operatorToken}}
+
+{
+  "meterNumber": "WTR-000001",
+  "meterType": "WATER",
+  "installationDate": "2026-01-20",
+  "customerId": "{{customerId}}"
+}
+
+### 4.10 Get meter by ID (operator)
+GET {{baseUrl}}/api/meters/{{meterId}}
+Content-Type: application/json
+Authorization: Bearer {{operatorToken}}
+
+### 4.11 List meters for customer (operator)
+GET {{baseUrl}}/api/meters/customer/{{customerId}}?page=0&size=10
+Content-Type: application/json
+Authorization: Bearer {{operatorToken}}
+
+### 4.12 NEGATIVE — Finance cannot create customer (expect 403)
+POST {{baseUrl}}/api/customers
+Content-Type: application/json
+Authorization: Bearer {{financeToken}}
+
+{
+  "fullName": "Forbidden Customer",
+  "nationalId": "1199980099999999",
+  "email": "forbidden@example.com",
+  "phoneNumber": "250788333444",
+  "address": "Kigali"
+}
+
+###############################################################################
+# PHASE 5 — OPERATOR: Meter Readings
+###############################################################################
+
+### 5.1 Capture June 2026 reading (operator)
+# @name createReading
+POST {{baseUrl}}/api/readings
+Content-Type: application/json
+Authorization: Bearer {{operatorToken}}
+
+{
+  "meterId": "{{meterId}}",
+  "previousReading": 100,
+  "currentReading": 125.5,
+  "readingDate": "2026-06-05",
+  "month": 6,
+  "year": 2026
+}
+
+@readingId = {{createReading.response.body.$.data.id}}
+
+### 5.2 NEGATIVE — Current reading <= previous (expect 400)
+POST {{baseUrl}}/api/readings
+Content-Type: application/json
+Authorization: Bearer {{operatorToken}}
+
+{
+  "meterId": "{{meterId}}",
+  "previousReading": 125.5,
+  "currentReading": 125.5,
+  "readingDate": "2026-06-06",
+  "month": 8,
+  "year": 2026
+}
+
+### 5.3 NEGATIVE — Duplicate reading same meter/month/year (expect 409)
+POST {{baseUrl}}/api/readings
+Content-Type: application/json
+Authorization: Bearer {{operatorToken}}
+
+{
+  "meterId": "{{meterId}}",
+  "previousReading": 100,
+  "currentReading": 130,
+  "readingDate": "2026-06-07",
+  "month": 6,
+  "year": 2026
+}
+
+### 5.4 Get reading by ID (operator)
+GET {{baseUrl}}/api/readings/{{readingId}}
+Content-Type: application/json
+Authorization: Bearer {{operatorToken}}
+
+### 5.5 List readings for meter (operator)
+GET {{baseUrl}}/api/readings/meter/{{meterId}}?page=0&size=10
+Content-Type: application/json
+Authorization: Bearer {{operatorToken}}
+
+### 5.6 Deactivate meter (for reading negative test)
+PUT {{baseUrl}}/api/meters/{{meterId}}/status
+Content-Type: application/json
+Authorization: Bearer {{operatorToken}}
+
+{
+  "status": "INACTIVE"
+}
+
+### 5.7 NEGATIVE — Reading on inactive meter (expect 422)
+POST {{baseUrl}}/api/readings
+Content-Type: application/json
+Authorization: Bearer {{operatorToken}}
+
+{
+  "meterId": "{{meterId}}",
+  "previousReading": 125.5,
+  "currentReading": 130,
+  "readingDate": "2026-07-01",
+  "month": 7,
+  "year": 2026
+}
+
+### 5.8 Reactivate meter
+PUT {{baseUrl}}/api/meters/{{meterId}}/status
+Content-Type: application/json
+Authorization: Bearer {{operatorToken}}
+
+{
+  "status": "ACTIVE"
+}
+
+### 5.9 NEGATIVE — Admin cannot create readings (expect 403)
+POST {{baseUrl}}/api/readings
+Content-Type: application/json
+Authorization: Bearer {{adminToken}}
+
+{
+  "meterId": "{{meterId}}",
+  "previousReading": 125.5,
+  "currentReading": 140,
+  "readingDate": "2026-07-05",
+  "month": 7,
+  "year": 2026
+}
+
+### 5.10 Capture July 2026 reading (for monthly batch test)
+# @name createReadingJuly
+POST {{baseUrl}}/api/readings
+Content-Type: application/json
+Authorization: Bearer {{operatorToken}}
+
+{
+  "meterId": "{{meterId}}",
+  "previousReading": 125.5,
+  "currentReading": 140,
+  "readingDate": "2026-07-05",
+  "month": 7,
+  "year": 2026
+}
+
+@readingIdJuly = {{createReadingJuly.response.body.$.data.id}}
+
+###############################################################################
+# PHASE 6 — Bills (generate, approve, list)
+###############################################################################
+
+### 6.1 Generate bill from June reading (admin)
+# @name generateBill
+POST {{baseUrl}}/api/bills/generate/{{readingId}}
+Content-Type: application/json
+Authorization: Bearer {{adminToken}}
+
+@billId = {{generateBill.response.body.$.data.id}}
+
+### 6.2 NEGATIVE — Duplicate bill for same reading (expect 409)
+POST {{baseUrl}}/api/bills/generate/{{readingId}}
+Content-Type: application/json
+Authorization: Bearer {{adminToken}}
+
+### 6.3 Get bill by ID (finance)
+GET {{baseUrl}}/api/bills/{{billId}}
+Content-Type: application/json
+Authorization: Bearer {{financeToken}}
+
+### 6.4 List bills (customer)
+GET {{baseUrl}}/api/bills?page=0&size=10
+Content-Type: application/json
+Authorization: Bearer {{customerToken}}
+
+### 6.5 Approve bill (finance)
+PUT {{baseUrl}}/api/bills/{{billId}}/approve
+Content-Type: application/json
+Authorization: Bearer {{financeToken}}
+
+{
+  "status": "APPROVED"
+}
+
+### 6.6 NEGATIVE — Customer cannot approve bill (expect 403)
+PUT {{baseUrl}}/api/bills/{{billId}}/approve
+Content-Type: application/json
+Authorization: Bearer {{customerToken}}
+
+{
+  "status": "APPROVED"
+}
+
+### 6.7 Monthly bill generation (admin only)
+POST {{baseUrl}}/api/bills/generate
+Content-Type: application/json
+Authorization: Bearer {{adminToken}}
+
+{
+  "month": 7,
+  "year": 2026
+}
+
+### 6.8 NEGATIVE — Finance cannot run monthly generation (expect 403)
+POST {{baseUrl}}/api/bills/generate
+Content-Type: application/json
+Authorization: Bearer {{financeToken}}
+
+{
+  "month": 7,
+  "year": 2026
+}
+
+###############################################################################
+# PHASE 7 — Payments
+###############################################################################
+
+### 7.1 Partial payment (finance)
+# @name recordPaymentPartial
+POST {{baseUrl}}/api/payments
+Content-Type: application/json
+Authorization: Bearer {{financeToken}}
+
+{
+  "billId": "{{billId}}",
+  "amountPaid": 5000.00,
+  "paymentMethod": "MOBILE_MONEY",
+  "paymentDate": "2026-06-05"
+}
+
+@paymentId = {{recordPaymentPartial.response.body.$.data.id}}
+
+### 7.2 Final payment — settle remaining balance (customer)
+# @name recordPaymentFinal
+POST {{baseUrl}}/api/payments
+Content-Type: application/json
+Authorization: Bearer {{customerToken}}
+
+{
+  "billId": "{{billId}}",
+  "amountPaid": 11225.00,
+  "paymentMethod": "BANK_TRANSFER",
+  "paymentDate": "2026-06-06"
+}
+
+### 7.3 Get payment by ID (finance)
+GET {{baseUrl}}/api/payments/{{paymentId}}
+Content-Type: application/json
+Authorization: Bearer {{financeToken}}
+
+### 7.4 List all payments (finance)
+GET {{baseUrl}}/api/payments?page=0&size=10
+Content-Type: application/json
+Authorization: Bearer {{financeToken}}
+
+### 7.5 List payments for bill (customer)
+GET {{baseUrl}}/api/payments?billId={{billId}}&page=0&size=10
+Content-Type: application/json
+Authorization: Bearer {{customerToken}}
+
+### 7.6 NEGATIVE — Payment on already-paid bill (expect 422)
+POST {{baseUrl}}/api/payments
+Content-Type: application/json
+Authorization: Bearer {{financeToken}}
+
+{
+  "billId": "{{billId}}",
+  "amountPaid": 100.00,
+  "paymentMethod": "CASH",
+  "paymentDate": "2026-06-07"
+}
+
+### 7.7 NEGATIVE — Admin cannot record payment (expect 403)
+POST {{baseUrl}}/api/payments
+Content-Type: application/json
+Authorization: Bearer {{adminToken}}
+
+{
+  "billId": "{{billId}}",
+  "amountPaid": 100.00,
+  "paymentMethod": "CASH",
+  "paymentDate": "2026-06-07"
+}
+
+### 7.8 Verify bill is PAID (customer)
+GET {{baseUrl}}/api/bills/{{billId}}
+Content-Type: application/json
+Authorization: Bearer {{customerToken}}
+
+###############################################################################
+# PHASE 8 — Notifications (optional)
+###############################################################################
+
+### 8.1 Get notifications for customer user (customer token)
+GET {{baseUrl}}/api/notifications/user/{{customerUserId}}?page=0&size=10
+Content-Type: application/json
+Authorization: Bearer {{customerToken}}

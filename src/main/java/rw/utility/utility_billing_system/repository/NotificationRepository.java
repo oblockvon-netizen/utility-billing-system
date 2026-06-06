@@ -7,7 +7,11 @@ import rw.utility.utility_billing_system.entity.Notification;
 
 import java.util.UUID;
 
+/**
+ * Spring Data repository for paginated notifications by user.
+ */
+
 public interface NotificationRepository extends JpaRepository<Notification, UUID> {
 
-    Page<Notification> findByCustomerIdOrderBySentAtDesc(UUID customerId, Pageable pageable);
-}
+    // Newest notifications appear first
+    Page<Notification> findByCustomerIdOrderBySentAtDesc(UUID customerId, Pageable pageable);}

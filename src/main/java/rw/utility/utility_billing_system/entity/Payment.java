@@ -25,6 +25,9 @@ import java.time.LocalDate;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+/**
+ * JPA entity for bill payment transactions with method and reference.
+ */
 public class Payment extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
@@ -41,6 +44,7 @@ public class Payment extends BaseEntity {
     @Column(nullable = false)
     private LocalDate paymentDate;
 
+    // Auto-generated reference supports idempotent payment tracking
     @Column(nullable = false, unique = true)
     private String reference;
 }

@@ -22,6 +22,9 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
+/**
+ * Retrieves paginated notifications for a given user.
+ */
 public class NotificationServiceImpl implements NotificationService {
 
     private final NotificationRepository notificationRepository;
@@ -40,8 +43,8 @@ public class NotificationServiceImpl implements NotificationService {
                 .orElse(null);
 
         if (customer == null) {
-            return Page.empty(pageable);
-        }
+            // Users without a linked customer record have no notifications
+            return Page.empty(pageable);        }
 
         return notificationRepository
                 .findByCustomerIdOrderBySentAtDesc(customer.getId(), pageable)

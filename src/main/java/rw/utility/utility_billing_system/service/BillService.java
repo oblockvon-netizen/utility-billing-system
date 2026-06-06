@@ -7,12 +7,16 @@ import rw.utility.utility_billing_system.dto.BillResponse;
 
 import java.util.UUID;
 
+/**
+ * Business contract for bill generation, approval workflow, and retrieval.
+ */
+
 public interface BillService {
 
     BillResponse generateBill(UUID readingId);
 
+    // Batch path invokes the generate_monthly_bills stored procedure
     void generateMonthlyBills(int month, int year);
-
     BillResponse approve(UUID billId, BillApprovalRequest request);
 
     BillResponse findById(UUID billId);

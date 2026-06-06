@@ -5,7 +5,11 @@ import rw.utility.utility_billing_system.entity.Bill;
 
 import java.util.UUID;
 
+/**
+ * Spring Data repository for Bill persistence and existence checks by reading.
+ */
+
 public interface BillRepository extends JpaRepository<Bill, UUID> {
 
-    boolean existsByMeterReadingId(UUID meterReadingId);
-}
+    // Prevents duplicate bills for the same meter reading
+    boolean existsByMeterReadingId(UUID meterReadingId);}

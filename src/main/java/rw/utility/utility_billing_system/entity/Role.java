@@ -18,9 +18,13 @@ import lombok.Setter;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+/**
+ * JPA entity for the roles lookup table referenced by users.
+ */
 public class Role extends BaseEntity {
 
     @Enumerated(EnumType.STRING)
+    // One row per Role enum value, seeded on startup
     @Column(nullable = false, unique = true)
     private rw.utility.utility_billing_system.enums.Role name;
 }

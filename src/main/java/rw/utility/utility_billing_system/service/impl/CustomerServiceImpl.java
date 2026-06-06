@@ -18,6 +18,9 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
+/**
+ * Persists and manages utility customer records linked to user accounts.
+ */
 public class CustomerServiceImpl implements CustomerService {
 
     private final CustomerRepository customerRepository;
@@ -88,6 +91,6 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     private String normalize(String value) {
-        return value.trim().toUpperCase();
-    }
+        // National IDs are stored in a canonical uppercase form
+        return value.trim().toUpperCase();    }
 }

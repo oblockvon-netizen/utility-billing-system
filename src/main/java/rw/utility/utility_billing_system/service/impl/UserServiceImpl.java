@@ -21,6 +21,9 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+/**
+ * Administrative operations for user status toggling and role assignment.
+ */
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
@@ -52,7 +55,7 @@ public class UserServiceImpl implements UserService {
                         .orElseThrow(() -> new ResourceNotFoundException("Role not found: " + role)))
                 .collect(Collectors.toCollection(HashSet::new));
 
-        user.setRoles(roleEntities);
-        return UserMapper.toResponse(userRepository.save(user));
+        // Full replacement; omitted roles are revoked
+        user.setRoles(roleEntities);        return UserMapper.toResponse(userRepository.save(user));
     }
 }

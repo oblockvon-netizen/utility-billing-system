@@ -7,6 +7,10 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
+/**
+ * Bill details returned by bill generation and query endpoints.
+ */
+
 public record BillResponse(
         UUID id,
         UUID customerId,
@@ -23,8 +27,8 @@ public record BillResponse(
         BigDecimal penaltyAmount,
         BigDecimal totalAmount,
         BigDecimal amountPaid,
-        BigDecimal outstandingBalance,
-        BillStatus status,
+        // Remaining amount due after partial payments
+        BigDecimal outstandingBalance,        BillStatus status,
         LocalDate generatedDate,
         LocalDate dueDate,
         String approvedBy,

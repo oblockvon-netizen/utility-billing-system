@@ -8,6 +8,10 @@ import rw.utility.utility_billing_system.enums.Status;
 
 import java.util.UUID;
 
+/**
+ * Business contract for customer registration, updates, and status management.
+ */
+
 public interface CustomerService {
 
     CustomerResponse create(CustomerRequest request);
@@ -18,5 +22,5 @@ public interface CustomerService {
 
     Page<CustomerResponse> findAll(Pageable pageable);
 
-    CustomerResponse updateStatus(UUID customerId, Status status);
-}
+    // Inactive customers are blocked from receiving new bills
+    CustomerResponse updateStatus(UUID customerId, Status status);}

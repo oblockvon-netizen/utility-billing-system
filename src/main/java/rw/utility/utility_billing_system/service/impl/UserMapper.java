@@ -5,11 +5,16 @@ import rw.utility.utility_billing_system.entity.User;
 
 import java.util.stream.Collectors;
 
+/**
+ * Maps User entities to UserResponse DTOs (excludes password).
+ */
+
 final class UserMapper {
 
     private UserMapper() {
     }
 
+    // Password hash is never exposed in API responses
     static UserResponse toResponse(User user) {
         return new UserResponse(
                 user.getId(),

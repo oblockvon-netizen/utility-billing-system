@@ -15,6 +15,9 @@ import java.util.List;
 
 @Component
 @RequiredArgsConstructor
+/**
+ * Returns a JSON 403 response when an authenticated user lacks the required authority.
+ */
 public class RestAccessDeniedHandler implements AccessDeniedHandler {
 
     private final ObjectMapper objectMapper;
@@ -25,8 +28,8 @@ public class RestAccessDeniedHandler implements AccessDeniedHandler {
             HttpServletResponse response,
             AccessDeniedException accessDeniedException
     ) throws IOException {
-        response.setStatus(HttpServletResponse.SC_FORBIDDEN);
-        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+        // User is authenticated but lacks the required role
+        response.setStatus(HttpServletResponse.SC_FORBIDDEN);        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
         objectMapper.writeValue(
                 response.getOutputStream(),
                 ApiResponse.error("Access denied", List.of("Insufficient permissions"))

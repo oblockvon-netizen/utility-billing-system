@@ -23,6 +23,9 @@ import java.time.LocalDate;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+/**
+ * JPA entity for pricing rules (unit price, VAT rate, service charge) by meter type.
+ */
 public class Tariff extends BaseEntity {
 
     @Enumerated(EnumType.STRING)
@@ -50,8 +53,8 @@ public class Tariff extends BaseEntity {
     private Double penaltyRate;
 
     @Column(nullable = false)
+    // Bill generation picks the latest active tariff on or before this date
     private LocalDate effectiveDate;
-
     @Column(nullable = false)
     private boolean active;
 }

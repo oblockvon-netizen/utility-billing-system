@@ -26,6 +26,9 @@ import java.util.Set;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+/**
+ * JPA entity for system users with credentials, status, and assigned roles.
+ */
 public class User extends BaseEntity {
 
     @Column(nullable = false)
@@ -44,6 +47,7 @@ public class User extends BaseEntity {
     @Column(nullable = false)
     private Status status;
 
+    // Roles are loaded eagerly for JWT authority resolution
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "user_roles",

@@ -15,6 +15,9 @@ import java.util.UUID;
 @MappedSuperclass
 @Getter
 @Setter
+/**
+ * Mapped superclass providing UUID primary key and automatic created/updated timestamps.
+ */
 public abstract class BaseEntity {
 
     @Id
@@ -27,6 +30,7 @@ public abstract class BaseEntity {
     @Column(nullable = false)
     private LocalDateTime updatedAt;
 
+    // Set both timestamps on first insert
     @PrePersist
     protected void onCreate() {
         LocalDateTime now = LocalDateTime.now();

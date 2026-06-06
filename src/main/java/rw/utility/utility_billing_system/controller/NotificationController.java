@@ -24,10 +24,14 @@ import java.util.UUID;
 @SecurityRequirement(name = "bearerAuth")
 @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_CUSTOMER')")
 @Tag(name = "Notifications", description = "User notification retrieval")
+/**
+ * REST resource for paginated user notifications. Accessible to ADMIN and CUSTOMER roles.
+ */
 public class NotificationController {
 
     private final NotificationService notificationService;
 
+    // Returns newest notifications first via default page sort
     @GetMapping("/user/{userId}")
     public ResponseEntity<ApiResponse<Page<NotificationResponse>>> getByUserId(
             @PathVariable UUID userId,

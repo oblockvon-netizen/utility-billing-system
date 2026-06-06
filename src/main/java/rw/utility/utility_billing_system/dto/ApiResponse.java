@@ -4,7 +4,11 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 
 import java.util.List;
 
+// Omits null data/errors fields from JSON output
 @JsonInclude(JsonInclude.Include.NON_NULL)
+/**
+ * Standard API envelope wrapping success/error messages and optional payload data.
+ */
 public record ApiResponse<T>(
         boolean success,
         String message,

@@ -14,11 +14,15 @@ import org.springframework.context.annotation.Configuration;
                 description = "Backend API for water and electricity billing management"
         )
 )
+// Enables Authorize in Swagger UI for protected endpoints
 @SecurityScheme(
         name = "bearerAuth",
         type = SecuritySchemeType.HTTP,
         scheme = "bearer",
         bearerFormat = "JWT"
 )
+/**
+ * OpenAPI metadata and JWT bearer scheme for Swagger UI authentication.
+ */
 public class SwaggerConfig {
 }

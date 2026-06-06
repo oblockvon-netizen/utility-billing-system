@@ -17,6 +17,9 @@ import rw.utility.utility_billing_system.dto.ApiResponse;
 import java.util.List;
 
 @RestControllerAdvice
+/**
+ * Maps domain and framework exceptions to consistent ApiResponse HTTP error payloads.
+ */
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(ResourceNotFoundException.class)
@@ -90,8 +93,9 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(DataAccessException.class)
     public ResponseEntity<ApiResponse<Void>> handleDataAccess(DataAccessException exception) {
         String causeMessage = exception.getMostSpecificCause().getMessage();
+        // Surface an actionable hint when the DB routine was not installed
         if (causeMessage != null && causeMessage.contains("generate_monthly_bills")) {
-            return error(
+        return error(
                     HttpStatus.SERVICE_UNAVAILABLE,
                     "Database routine generate_monthly_bills is missing. Ensure routines.sql ran on startup."
             );

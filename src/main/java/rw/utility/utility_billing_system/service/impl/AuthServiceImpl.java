@@ -27,6 +27,9 @@ import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
+/**
+ * Handles user registration with password hashing and JWT issuance on login.
+ */
 public class AuthServiceImpl implements AuthService {
 
     private final UserRepository userRepository;
@@ -48,8 +51,8 @@ public class AuthServiceImpl implements AuthService {
                 ? request.role()
                 : rw.utility.utility_billing_system.enums.Role.ROLE_CUSTOMER;
         if (signupRole != rw.utility.utility_billing_system.enums.Role.ROLE_CUSTOMER) {
-            throw new BusinessRuleException("Public signup only permits ROLE_CUSTOMER");
-        }
+            // Non-customer roles must be assigned by an administrator
+            throw new BusinessRuleException("Public signup only permits ROLE_CUSTOMER");        }
 
         Role customerRole = roleRepository
                 .findByName(rw.utility.utility_billing_system.enums.Role.ROLE_CUSTOMER)

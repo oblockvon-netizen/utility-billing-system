@@ -30,6 +30,9 @@ import java.util.UUID;
 @SecurityRequirement(name = "bearerAuth")
 @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_OPERATOR')")
 @Tag(name = "Customers", description = "Utility customer management")
+/**
+ * REST resource for utility customer CRUD and status changes. Restricted to ADMIN and OPERATOR roles.
+ */
 public class CustomerController {
 
     private final CustomerService customerService;
@@ -74,6 +77,7 @@ public class CustomerController {
         ));
     }
 
+    // Deactivating a customer blocks new bills on their meters
     @PutMapping("/{customerId}/status")
     public ResponseEntity<ApiResponse<CustomerResponse>> updateStatus(
             @PathVariable UUID customerId,

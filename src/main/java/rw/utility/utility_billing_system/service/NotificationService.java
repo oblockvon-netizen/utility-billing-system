@@ -6,7 +6,11 @@ import rw.utility.utility_billing_system.dto.NotificationResponse;
 
 import java.util.UUID;
 
+/**
+ * Business contract for retrieving user-scoped billing notifications.
+ */
+
 public interface NotificationService {
 
-    Page<NotificationResponse> getByUserId(UUID userId, Pageable pageable);
-}
+    // Customers may only query their own notifications
+    Page<NotificationResponse> getByUserId(UUID userId, Pageable pageable);}

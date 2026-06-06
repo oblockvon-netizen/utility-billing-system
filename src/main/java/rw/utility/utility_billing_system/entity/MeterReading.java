@@ -18,13 +18,16 @@ import java.time.LocalDate;
 @Entity
 @Table(
         name = "meter_readings",
-        uniqueConstraints = @UniqueConstraint(columnNames = {"meter_id", "month", "year"})
-)
+        // Database enforces one reading per meter per month/year
+        uniqueConstraints = @UniqueConstraint(columnNames = {"meter_id", "month", "year"}))
 @Getter
 @Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+/**
+ * JPA entity for monthly meter readings that drive consumption-based billing.
+ */
 public class MeterReading extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)

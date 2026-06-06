@@ -15,6 +15,9 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+/**
+ * Loads application users from the database for Spring Security authentication.
+ */
 public class UserDetailsServiceImpl implements UserDetailsService {
 
     private final UserRepository userRepository;
@@ -33,7 +36,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
                 .username(user.getEmail())
                 .password(user.getPassword())
                 .authorities(authorities)
-                .disabled(user.getStatus() != Status.ACTIVE)
-                .build();
+                // Disabled accounts cannot authenticate even with valid credentials
+                .disabled(user.getStatus() != Status.ACTIVE)                .build();
     }
 }

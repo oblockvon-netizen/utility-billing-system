@@ -19,10 +19,14 @@ import rw.utility.utility_billing_system.service.AuthService;
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
 @Tag(name = "Authentication", description = "User registration and JWT authentication")
+/**
+ * Public REST endpoints for user registration and JWT login (no authentication required).
+ */
 public class AuthController {
 
     private final AuthService authService;
 
+    // Self-service signup; only ROLE_CUSTOMER is permitted
     @PostMapping("/signup")
     public ResponseEntity<ApiResponse<AuthResponse>> signup(
             @Valid @RequestBody SignupRequest request

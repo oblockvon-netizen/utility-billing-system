@@ -28,7 +28,7 @@ Successful responses use:
 2. Set a JWT secret containing at least 32 bytes.
 3. Start the Spring Boot application.
 4. On startup the app runs `src/main/resources/db/routines.sql` automatically.
-   If monthly bill generation fails, manually execute that script against
+  If monthly bill generation fails, manually execute that script against
    `wasac_billing` and verify with `\df generate_monthly_bills`.
 5. Open Swagger UI and use **Authorize** to enter JWT tokens.
 
@@ -39,12 +39,14 @@ signup, then assign admin, operator, and finance roles directly in PostgreSQL.
 
 Use these test accounts:
 
-| Account | Email | Intended role |
-|---|---|---|
-| Admin | `admin@wasac.rw` | `ROLE_ADMIN` |
+
+| Account  | Email               | Intended role   |
+| -------- | ------------------- | --------------- |
+| Admin    | `admin@wasac.rw`    | `ROLE_ADMIN`    |
 | Operator | `operator@wasac.rw` | `ROLE_OPERATOR` |
-| Finance | `finance@wasac.rw` | `ROLE_FINANCE` |
+| Finance  | `finance@wasac.rw`  | `ROLE_FINANCE`  |
 | Customer | `customer@wasac.rw` | `ROLE_CUSTOMER` |
+
 
 After signup, assign roles in PostgreSQL. Connect to the **application database**
 first — the `postgres=#` prompt means you are on the default `postgres`
@@ -136,18 +138,20 @@ PAYMENT_ID=
 
 ## Role Access Summary
 
-| API group | Allowed roles |
-|---|---|
-| Authentication | Public |
-| Users | Admin |
-| Customers | Admin, Operator |
-| Meters | Admin, Operator |
-| Meter Readings | Operator |
-| Tariffs | Admin |
-| Bills | Admin, Finance, Customer |
-| Monthly bill generation | Admin |
-| Bill approval | Admin, Finance |
-| Payments | Finance, Customer |
+
+| API group               | Allowed roles            |
+| ----------------------- | ------------------------ |
+| Authentication          | Public                   |
+| Users                   | Admin                    |
+| Customers               | Admin, Operator          |
+| Meters                  | Admin, Operator          |
+| Meter Readings          | Operator                 |
+| Tariffs                 | Admin                    |
+| Bills                   | Admin, Finance, Customer |
+| Monthly bill generation | Admin                    |
+| Bill approval           | Admin, Finance           |
+| Payments                | Finance, Customer        |
+
 
 ## 1. Authentication
 
@@ -183,7 +187,7 @@ Negative tests:
 
 - Submit the same email twice: expect `409 Conflict`.
 - Submit an invalid email or password shorter than 8 characters: expect
-  `400 Bad Request`.
+`400 Bad Request`.
 
 ### POST `/api/auth/login`
 
@@ -329,7 +333,7 @@ Negative tests:
 
 - Submit the same `meterNumber`: expect `409 Conflict`.
 - Inactivate the customer and try assigning a new meter: expect
-  `422 Unprocessable Entity`.
+`422 Unprocessable Entity`.
 - Use a future installation date: expect `400 Bad Request`.
 
 ### GET `/api/meters/{meterId}`
@@ -461,9 +465,9 @@ Negative tests:
 
 - Submit the same meter/month/year again: expect `409 Conflict`.
 - Set `currentReading` equal to or below `previousReading`: expect
-  `400 Bad Request`.
+`400 Bad Request`.
 - Inactivate the meter and submit a reading: expect
-  `422 Unprocessable Entity`.
+`422 Unprocessable Entity`.
 - Use `ADMIN_TOKEN`: expect `403 Forbidden` because readings are operator-only.
 
 ### GET `/api/readings/{readingId}`
@@ -497,9 +501,9 @@ Negative tests:
 
 - Generate another bill from the same reading: expect `409 Conflict`.
 - Inactivate the customer before generation: expect
-  `422 Unprocessable Entity`.
+`422 Unprocessable Entity`.
 - Use a meter type without an applicable active tariff: expect
-  `422 Unprocessable Entity`.
+`422 Unprocessable Entity`.
 
 ### GET `/api/bills/{billId}`
 
@@ -628,16 +632,18 @@ Expected: a fully-paid payment confirmation notification.
 
 Run these checks across protected APIs:
 
-| Test | Expected result |
-|---|---|
-| No Authorization header | `401 Unauthorized` |
-| Invalid or expired JWT | `401 Unauthorized` |
-| Valid JWT with wrong role | `403 Forbidden` |
-| Unknown UUID | `404 Not Found` |
-| Missing required request field | `400 Bad Request` |
-| Invalid enum value | `400 Bad Request` |
-| Duplicate unique value | `409 Conflict` |
-| Business-rule violation | `422 Unprocessable Entity` |
+
+| Test                           | Expected result            |
+| ------------------------------ | -------------------------- |
+| No Authorization header        | `401 Unauthorized`         |
+| Invalid or expired JWT         | `401 Unauthorized`         |
+| Valid JWT with wrong role      | `403 Forbidden`            |
+| Unknown UUID                   | `404 Not Found`            |
+| Missing required request field | `400 Bad Request`          |
+| Invalid enum value             | `400 Bad Request`          |
+| Duplicate unique value         | `409 Conflict`             |
+| Business-rule violation        | `422 Unprocessable Entity` |
+
 
 ## 10. Recommended Full Test Order
 
@@ -657,3 +663,4 @@ Run these checks across protected APIs:
 14. Verify the payment-confirmed notification.
 15. Create another reading and test monthly stored-procedure generation.
 16. Run authorization and business-rule negative tests.
+

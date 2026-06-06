@@ -26,6 +26,9 @@ import java.time.LocalDate;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+/**
+ * JPA entity for the bills table; one bill is generated per meter reading.
+ */
 public class Bill extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
@@ -36,6 +39,7 @@ public class Bill extends BaseEntity {
     @JoinColumn(name = "meter_id", nullable = false)
     private Meter meter;
 
+    // Each reading produces at most one bill
     @OneToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "meter_reading_id", nullable = false, unique = true)
     private MeterReading meterReading;

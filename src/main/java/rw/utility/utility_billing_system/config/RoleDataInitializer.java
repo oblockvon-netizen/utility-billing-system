@@ -11,6 +11,9 @@ import java.util.Arrays;
 
 @Component
 @RequiredArgsConstructor
+/**
+ * Seeds the roles table from the Role enum on application startup.
+ */
 public class RoleDataInitializer implements CommandLineRunner {
 
     private final RoleRepository roleRepository;
@@ -19,8 +22,8 @@ public class RoleDataInitializer implements CommandLineRunner {
     @Transactional
     public void run(String... args) {
         Arrays.stream(rw.utility.utility_billing_system.enums.Role.values())
-                .filter(role -> roleRepository.findByName(role).isEmpty())
-                .map(role -> Role.builder().name(role).build())
+                // Idempotent: only insert roles that are missing
+                .filter(role -> roleRepository.findByName(role).isEmpty())                .map(role -> Role.builder().name(role).build())
                 .forEach(roleRepository::save);
     }
 }

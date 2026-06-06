@@ -7,14 +7,18 @@ import java.time.LocalDateTime;
 import java.util.Set;
 import java.util.UUID;
 
+/**
+ * Safe user profile for admin listing (no password or sensitive fields).
+ */
+
 public record UserResponse(
         UUID id,
         String fullName,
         String email,
         String phoneNumber,
         Status status,
-        Set<Role> roles,
-        LocalDateTime createdAt,
+        // Current authorities granted to the user
+        Set<Role> roles,        LocalDateTime createdAt,
         LocalDateTime updatedAt
 ) {
 }

@@ -16,6 +16,9 @@ import java.util.List;
 
 @Component
 @RequiredArgsConstructor
+/**
+ * Returns a JSON 401 response when an unauthenticated request hits a protected endpoint.
+ */
 public class RestAuthenticationEntryPoint implements AuthenticationEntryPoint {
 
     private final ObjectMapper objectMapper;
@@ -30,7 +33,7 @@ public class RestAuthenticationEntryPoint implements AuthenticationEntryPoint {
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
         objectMapper.writeValue(
                 response.getOutputStream(),
-                ApiResponse.error("Authentication required", List.of("Invalid or missing token"))
-        );
+                // Same envelope shape as controller success responses
+                ApiResponse.error("Authentication required", List.of("Invalid or missing token"))        );
     }
 }

@@ -3,11 +3,16 @@ package rw.utility.utility_billing_system.service.impl;
 import rw.utility.utility_billing_system.dto.PaymentResponse;
 import rw.utility.utility_billing_system.entity.Payment;
 
+/**
+ * Maps Payment entities to PaymentResponse DTOs.
+ */
+
 final class PaymentMapper {
 
     private PaymentMapper() {
     }
 
+    // Includes bill id so clients can link payment to invoice
     static PaymentResponse toResponse(Payment payment) {
         return new PaymentResponse(
                 payment.getId(),

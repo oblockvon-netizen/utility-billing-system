@@ -24,12 +24,16 @@ import java.time.LocalDateTime;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+/**
+ * JPA entity for in-app notifications delivered to users (e.g. bill issued, payment received).
+ */
 public class Notification extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "customer_id", nullable = false)
     private Customer customer;
 
+    // Message body may contain formatted billing details
     @Column(nullable = false, columnDefinition = "TEXT")
     private String message;
 

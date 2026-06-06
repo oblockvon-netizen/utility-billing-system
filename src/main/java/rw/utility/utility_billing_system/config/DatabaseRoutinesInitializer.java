@@ -12,6 +12,9 @@ import javax.sql.DataSource;
 @Component
 @Order(2)
 @RequiredArgsConstructor
+/**
+ * Loads PostgreSQL stored procedures from routines.sql after the schema is ready.
+ */
 public class DatabaseRoutinesInitializer implements CommandLineRunner {
 
     private final DataSource dataSource;
@@ -19,8 +22,8 @@ public class DatabaseRoutinesInitializer implements CommandLineRunner {
     @Override
     public void run(String... args) {
         ResourceDatabasePopulator populator = new ResourceDatabasePopulator();
-        populator.setSeparator(";;");
-        populator.addScript(new ClassPathResource("db/routines.sql"));
+        // PostgreSQL dollar-quoted blocks use ;; as statement delimiter
+        populator.setSeparator(";;");        populator.addScript(new ClassPathResource("db/routines.sql"));
         populator.execute(dataSource);
     }
 }

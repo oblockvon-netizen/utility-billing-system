@@ -8,6 +8,10 @@ import rw.utility.utility_billing_system.enums.Status;
 
 import java.util.UUID;
 
+/**
+ * Business contract for meter assignment to customers and status management.
+ */
+
 public interface MeterService {
 
     MeterResponse create(MeterRequest request);
@@ -16,7 +20,7 @@ public interface MeterService {
 
     MeterResponse findById(UUID meterId);
 
+    // Returns all meters registered to one customer account
     Page<MeterResponse> findByCustomer(UUID customerId, Pageable pageable);
-
     MeterResponse updateStatus(UUID meterId, Status status);
 }

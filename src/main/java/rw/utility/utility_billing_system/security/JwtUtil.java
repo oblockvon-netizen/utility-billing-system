@@ -14,6 +14,9 @@ import java.util.Date;
 import java.util.function.Function;
 
 @Component
+/**
+ * Utility for creating and validating JWT access tokens tied to UserDetails.
+ */
 public class JwtUtil {
 
     private final String secret;
@@ -29,8 +32,8 @@ public class JwtUtil {
 
     @PostConstruct
     void validateConfiguration() {
-        if (secret.getBytes(StandardCharsets.UTF_8).length < 32) {
-            throw new IllegalStateException("JWT_SECRET must contain at least 32 bytes");
+        // HMAC-SHA256 requires a sufficiently long secret
+        if (secret.getBytes(StandardCharsets.UTF_8).length < 32) {            throw new IllegalStateException("JWT_SECRET must contain at least 32 bytes");
         }
     }
 

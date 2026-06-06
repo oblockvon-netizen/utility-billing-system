@@ -7,9 +7,13 @@ import rw.utility.utility_billing_system.entity.Meter;
 
 import java.util.UUID;
 
+/**
+ * Spring Data repository for Meter persistence and customer-scoped queries.
+ */
+
 public interface MeterRepository extends JpaRepository<Meter, UUID> {
 
     boolean existsByMeterNumber(String meterNumber);
 
-    Page<Meter> findByCustomerId(UUID customerId, Pageable pageable);
-}
+    // Lists meters registered under a given customer
+    Page<Meter> findByCustomerId(UUID customerId, Pageable pageable);}

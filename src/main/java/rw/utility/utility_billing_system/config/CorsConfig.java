@@ -9,6 +9,9 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import java.util.List;
 
 @Configuration
+/**
+ * CORS configuration allowing local front-end clients to call the API with credentials.
+ */
 public class CorsConfig {
 
     @Bean
@@ -20,8 +23,8 @@ public class CorsConfig {
         ));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
+        // Required when the client sends Authorization cookies or headers
         configuration.setAllowCredentials(true);
-
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
         return source;

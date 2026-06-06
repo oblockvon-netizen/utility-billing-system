@@ -21,6 +21,9 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
+/**
+ * Registers meters for customers and enforces active-customer constraints.
+ */
 public class MeterServiceImpl implements MeterService {
 
     private final MeterRepository meterRepository;
@@ -106,8 +109,8 @@ public class MeterServiceImpl implements MeterService {
 
     private void ensureCustomerActive(Customer customer) {
         if (customer.getStatus() != Status.ACTIVE) {
-            throw new BusinessRuleException("Inactive customers cannot be assigned new meters");
-        }
+            // Prevents billing setup for suspended accounts
+            throw new BusinessRuleException("Inactive customers cannot be assigned new meters");        }
     }
 
     private String normalize(String value) {

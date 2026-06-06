@@ -8,6 +8,10 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
+/**
+ * Tariff configuration returned by tariff management endpoints.
+ */
+
 public record TariffResponse(
         UUID id,
         MeterType meterType,
@@ -18,8 +22,8 @@ public record TariffResponse(
         BigDecimal serviceCharge,
         Double vatRate,
         Double penaltyRate,
-        LocalDate effectiveDate,
-        boolean active,
+        // Date from which this rate becomes billable
+        LocalDate effectiveDate,        boolean active,
         LocalDateTime createdAt,
         LocalDateTime updatedAt
 ) {

@@ -30,6 +30,9 @@ import java.util.UUID;
 @SecurityRequirement(name = "bearerAuth")
 @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_OPERATOR')")
 @Tag(name = "Meters", description = "Water and electricity meter management")
+/**
+ * REST resource for water/electricity meter registration and lifecycle. Restricted to ADMIN and OPERATOR roles.
+ */
 public class MeterController {
 
     private final MeterService meterService;
@@ -64,6 +67,7 @@ public class MeterController {
         ));
     }
 
+    // Lists all meters registered to a single customer
     @GetMapping("/customer/{customerId}")
     public ResponseEntity<ApiResponse<Page<MeterResponse>>> findByCustomer(
             @PathVariable UUID customerId,

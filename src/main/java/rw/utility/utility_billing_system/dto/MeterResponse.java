@@ -7,10 +7,14 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
+/**
+ * Meter details including type, serial number, and status.
+ */
+
 public record MeterResponse(
         UUID id,
-        String meterNumber,
-        MeterType meterType,
+        // Unique physical meter identifier
+        String meterNumber,        MeterType meterType,
         LocalDate installationDate,
         Status status,
         UUID customerId,

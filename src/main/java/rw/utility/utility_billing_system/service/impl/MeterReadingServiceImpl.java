@@ -22,6 +22,9 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
+/**
+ * Captures meter readings with consumption validation and duplicate-month guards.
+ */
 public class MeterReadingServiceImpl implements MeterReadingService {
 
     private final MeterReadingRepository meterReadingRepository;
@@ -37,8 +40,8 @@ public class MeterReadingServiceImpl implements MeterReadingService {
             throw new BusinessRuleException("Readings cannot be captured for inactive meters");
         }
 
-        if (request.currentReading() <= request.previousReading()) {
-            throw new InvalidReadingException(
+        // Meters only advance; rollback requires a correction workflow
+        if (request.currentReading() <= request.previousReading()) {            throw new InvalidReadingException(
                     "Current reading must be greater than previous reading"
             );
         }

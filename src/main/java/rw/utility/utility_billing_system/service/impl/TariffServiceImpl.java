@@ -18,6 +18,9 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
+/**
+ * Manages tariff definitions used during bill amount calculation.
+ */
 public class TariffServiceImpl implements TariffService {
 
     private final TariffRepository tariffRepository;
@@ -62,8 +65,8 @@ public class TariffServiceImpl implements TariffService {
 
     private void validateUnitRange(TariffRequest request) {
         if (request.minUnits() != null && request.maxUnits() != null
-                && request.maxUnits() < request.minUnits()) {
-            throw new BusinessRuleException("Maximum units cannot be less than minimum units");
+                // Tiered tariffs require a valid consumption band
+                && request.maxUnits() < request.minUnits()) {            throw new BusinessRuleException("Maximum units cannot be less than minimum units");
         }
     }
 

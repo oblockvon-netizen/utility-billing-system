@@ -31,6 +31,9 @@ import java.util.UUID;
 @SecurityRequirement(name = "bearerAuth")
 @PreAuthorize("hasAuthority('ROLE_ADMIN')")
 @Tag(name = "Tariffs", description = "Water and electricity tariff configuration")
+/**
+ * REST resource for tariff configuration (unit price, VAT, service charge). Restricted to ADMIN role.
+ */
 public class TariffController {
 
     private final TariffService tariffService;
@@ -64,8 +67,8 @@ public class TariffController {
 
     @GetMapping
     public ResponseEntity<ApiResponse<Page<TariffResponse>>> findAll(
-            @RequestParam(required = false) MeterType meterType,
-            Pageable pageable
+            // Omit to return tariffs for all meter types
+            @RequestParam(required = false) MeterType meterType,            Pageable pageable
     ) {
         return ResponseEntity.ok(ApiResponse.success(
                 "Tariffs retrieved successfully",

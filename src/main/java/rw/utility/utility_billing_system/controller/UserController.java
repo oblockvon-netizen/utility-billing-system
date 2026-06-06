@@ -29,6 +29,9 @@ import java.util.UUID;
 @SecurityRequirement(name = "bearerAuth")
 @PreAuthorize("hasAuthority('ROLE_ADMIN')")
 @Tag(name = "Users", description = "Administrative user management")
+/**
+ * Administrative REST resource for listing users and updating status/roles. Restricted to ADMIN role.
+ */
 public class UserController {
 
     private final UserService userService;
@@ -53,6 +56,7 @@ public class UserController {
         );
     }
 
+    // Replaces the user's entire role set in one request
     @PutMapping("/{userId}/roles")
     public ResponseEntity<ApiResponse<UserResponse>> setRoles(
             @PathVariable UUID userId,

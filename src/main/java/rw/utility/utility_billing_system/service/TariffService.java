@@ -8,6 +8,10 @@ import rw.utility.utility_billing_system.enums.MeterType;
 
 import java.util.UUID;
 
+/**
+ * Business contract for tariff CRUD and lookup by meter type.
+ */
+
 public interface TariffService {
 
     TariffResponse create(TariffRequest request);
@@ -16,5 +20,5 @@ public interface TariffService {
 
     TariffResponse findById(UUID tariffId);
 
-    Page<TariffResponse> findAll(MeterType meterType, Pageable pageable);
-}
+    // meterType filter is optional for admin tariff browsing
+    Page<TariffResponse> findAll(MeterType meterType, Pageable pageable);}

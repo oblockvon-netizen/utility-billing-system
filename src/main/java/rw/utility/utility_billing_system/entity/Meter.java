@@ -25,6 +25,9 @@ import java.time.LocalDate;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+/**
+ * JPA entity for water or electricity meters assigned to a customer.
+ */
 public class Meter extends BaseEntity {
 
     @Column(nullable = false, unique = true)
@@ -41,6 +44,7 @@ public class Meter extends BaseEntity {
     @Column(nullable = false)
     private Status status;
 
+    // Each meter belongs to exactly one customer account
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "customer_id", nullable = false)
     private Customer customer;

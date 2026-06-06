@@ -17,6 +17,9 @@ import java.io.IOException;
 
 @Component
 @RequiredArgsConstructor
+/**
+ * Servlet filter that validates Bearer JWT tokens and populates the Spring Security context.
+ */
 public class JwtAuthFilter extends OncePerRequestFilter {
 
     private final JwtUtil jwtUtil;
@@ -54,8 +57,8 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                 }
             }
         } catch (JwtException | IllegalArgumentException ignored) {
-            SecurityContextHolder.clearContext();
-        }
+            // Invalid tokens must not leave a stale authentication
+            SecurityContextHolder.clearContext();        }
 
         filterChain.doFilter(request, response);
     }

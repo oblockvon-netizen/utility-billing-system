@@ -8,15 +8,19 @@ import rw.utility.utility_billing_system.enums.MeterType;
 import java.time.LocalDate;
 import java.util.UUID;
 
+/**
+ * Request body for registering or updating a customer meter.
+ */
+
 public record MeterRequest(
         @NotBlank(message = "Meter number is required")
         String meterNumber,
 
         @NotNull(message = "Meter type is required")
+        // Determines which tariff applies during billing
         MeterType meterType,
-
         @NotNull(message = "Installation date is required")
-        @PastOrPresent(message = "Installation date cannot be in the future")
+    @PastOrPresent(message = "Installation date cannot be in the future")
         LocalDate installationDate,
 
         @NotNull(message = "Customer ID is required")

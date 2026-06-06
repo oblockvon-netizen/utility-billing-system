@@ -22,6 +22,9 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
+/**
+ * Records payments, updates bill balances, and marks bills PAID when fully settled.
+ */
 public class PaymentServiceImpl implements PaymentService {
 
     private final PaymentRepository paymentRepository;
@@ -49,8 +52,8 @@ public class PaymentServiceImpl implements PaymentService {
         bill.setAmountPaid(bill.getAmountPaid().add(amount).setScale(2, RoundingMode.HALF_UP));
         BigDecimal outstandingBalance = bill.getOutstandingBalance().subtract(amount)
                 .setScale(2, RoundingMode.HALF_UP);
-        if (outstandingBalance.compareTo(BigDecimal.ZERO) <= 0) {
-            outstandingBalance = BigDecimal.ZERO.setScale(2, RoundingMode.HALF_UP);
+        // Partial payments keep the bill open until balance reaches zero
+        if (outstandingBalance.compareTo(BigDecimal.ZERO) <= 0) {            outstandingBalance = BigDecimal.ZERO.setScale(2, RoundingMode.HALF_UP);
             bill.setStatus(BillStatus.PAID);
         }
         bill.setOutstandingBalance(outstandingBalance);
@@ -71,7 +74,7 @@ public class PaymentServiceImpl implements PaymentService {
     @Transactional(readOnly = true)
     public Page<PaymentResponse> findAll(UUID billId, Pageable pageable) {
         if (billId == null) {
-            return paymentRepository.findAll(pageable).map(PaymentMapper::toResponse);
+        return paymentRepository.findAll(pageable).map(PaymentMapper::toResponse);
         }
         if (!billRepository.existsById(billId)) {
             throw new ResourceNotFoundException("Bill not found");

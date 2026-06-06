@@ -7,7 +7,11 @@ import rw.utility.utility_billing_system.entity.Payment;
 
 import java.util.UUID;
 
+/**
+ * Spring Data repository for Payment records, optionally filtered by bill.
+ */
+
 public interface PaymentRepository extends JpaRepository<Payment, UUID> {
 
-    Page<Payment> findByBillId(UUID billId, Pageable pageable);
-}
+    // Returns payment history for a single bill
+    Page<Payment> findByBillId(UUID billId, Pageable pageable);}

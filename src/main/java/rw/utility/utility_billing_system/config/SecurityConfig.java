@@ -25,6 +25,9 @@ import rw.utility.utility_billing_system.security.UserDetailsServiceImpl;
 @EnableWebSecurity
 @EnableMethodSecurity
 @RequiredArgsConstructor
+/**
+ * Central Spring Security setup: stateless JWT auth and role-based URL access rules.
+ */
 public class SecurityConfig {
 
     private final JwtAuthFilter jwtAuthFilter;
@@ -39,8 +42,8 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource))
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(session ->
-                        session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .exceptionHandling(exceptions -> exceptions
+                        // JWT replaces server-side sessions
+                        session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))                .exceptionHandling(exceptions -> exceptions
                         .authenticationEntryPoint(authenticationEntryPoint)
                         .accessDeniedHandler(accessDeniedHandler))
                 .authenticationProvider(authenticationProvider())

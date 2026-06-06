@@ -19,11 +19,15 @@ import rw.utility.utility_billing_system.enums.Status;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+/**
+ * JPA entity for utility customers; linked to a User account and owns meters.
+ */
 public class Customer extends BaseEntity {
 
     @Column(nullable = false)
     private String fullName;
 
+    // National ID is the business key for customer identity
     @Column(nullable = false, unique = true)
     private String nationalId;
 

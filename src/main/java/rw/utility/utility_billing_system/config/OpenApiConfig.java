@@ -6,6 +6,9 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
+/**
+ * OpenAPI customization that documents standard HTTP error responses on every operation.
+ */
 public class OpenApiConfig {
 
     @Bean
@@ -28,8 +31,8 @@ public class OpenApiConfig {
             String statusCode,
             String description
     ) {
-        if (operation.getResponses() != null && operation.getResponses().containsKey(statusCode)) {
-            return;
+        // Skip statuses already declared on the controller method
+        if (operation.getResponses() != null && operation.getResponses().containsKey(statusCode)) {            return;
         }
         operation.getResponses().addApiResponse(
                 statusCode,

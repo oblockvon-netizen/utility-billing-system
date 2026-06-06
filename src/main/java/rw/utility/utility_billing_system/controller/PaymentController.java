@@ -29,6 +29,9 @@ import java.util.UUID;
 @SecurityRequirement(name = "bearerAuth")
 @PreAuthorize("hasAnyAuthority('ROLE_FINANCE', 'ROLE_CUSTOMER')")
 @Tag(name = "Payments", description = "Utility bill payment recording and retrieval")
+/**
+ * REST resource for recording bill payments and listing payment history. Accessible to FINANCE and CUSTOMER roles.
+ */
 public class PaymentController {
 
     private final PaymentService paymentService;
@@ -56,8 +59,8 @@ public class PaymentController {
 
     @GetMapping
     public ResponseEntity<ApiResponse<Page<PaymentResponse>>> findAll(
-            @RequestParam(required = false) UUID billId,
-            Pageable pageable
+            // Optional filter to list payments for one bill
+            @RequestParam(required = false) UUID billId,            Pageable pageable
     ) {
         return ResponseEntity.ok(ApiResponse.success(
                 "Payments retrieved successfully",

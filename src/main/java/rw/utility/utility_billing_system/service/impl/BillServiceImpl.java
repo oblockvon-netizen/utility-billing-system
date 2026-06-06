@@ -32,6 +32,9 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
+/**
+ * Generates bills from meter readings using applicable tariffs; supports approval and batch generation.
+ */
 public class BillServiceImpl implements BillService {
 
     private static final BigDecimal ONE_HUNDRED = BigDecimal.valueOf(100);
@@ -62,6 +65,7 @@ public class BillServiceImpl implements BillService {
 
         LocalDate generationDate = LocalDate.now();
         Tariff tariff = tariffRepository
+                // Select the most recent active tariff effective on the bill date
                 .findTopByMeterTypeAndActiveTrueAndEffectiveDateLessThanEqualOrderByEffectiveDateDesc(
                         meter.getMeterType(),
                         generationDate

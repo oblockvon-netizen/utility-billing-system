@@ -28,10 +28,14 @@ import java.util.UUID;
 @SecurityRequirement(name = "bearerAuth")
 @PreAuthorize("hasAuthority('ROLE_OPERATOR')")
 @Tag(name = "Meter Readings", description = "Monthly utility meter reading capture and retrieval")
+/**
+ * REST resource for capturing monthly meter readings. Restricted to OPERATOR role.
+ */
 public class ReadingController {
 
     private final MeterReadingService meterReadingService;
 
+    // One reading per meter per calendar month is enforced in the service
     @PostMapping
     public ResponseEntity<ApiResponse<MeterReadingResponse>> create(
             @Valid @RequestBody MeterReadingRequest request
